@@ -10,11 +10,14 @@ import UIKit
 
 class CanvasView: UIView {
 
-    var lineColor:UIColor!
-    var lineWidth:CGFloat!
-    var path:UIBezierPath!
-    var touchPoint:CGPoint!
-    var startingPoint:CGPoint!
+    var lineColor: UIColor!
+    var lineWidth: CGFloat!
+    var touchPoint: CGPoint!
+    var startingPoint: CGPoint!
+    
+    var circleArray: Array<UIBezierPath> = Array()
+    
+    var counter: Int = 1
     
     override func layoutSubviews() {
         self.clipsToBounds = true
@@ -27,23 +30,14 @@ class CanvasView: UIView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         startingPoint = touch?.location(in: self )
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        touchPoint = touch?.location(in: self)
-        
-        path = UIBezierPath()
-        path.move(to: startingPoint)
-        path.addLine(to: touchPoint)
-        startingPoint = touchPoint
         
         drawCircle()
     }
     
     func drawCircle() {
         let circlePath = UIBezierPath(arcCenter: startingPoint, radius: CGFloat(20), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
-
+        
+        circleArray.append(circlePath)
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = circlePath.cgPath
 
@@ -55,7 +49,8 @@ class CanvasView: UIView {
     }
     
     func clearCanvas() {
-        path.removeAllPoints()
+        circleArray.forEach { path in path.removeAllPoints()}
+        circleArray.removeAll()
         self.layer.sublayers = nil
         self.setNeedsDisplay()
     }
