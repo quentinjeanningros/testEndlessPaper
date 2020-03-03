@@ -81,7 +81,7 @@ class CanvasView: UIView {
         self.setNeedsDisplay()
     }
     
-    func pythagore(c1: CGFloat, c2: CGFloat) -> CGFloat {
+    func reciprocalPythagore(c1: CGFloat, c2: CGFloat) -> CGFloat {
         return (c1 * c1 + c2 * c2).squareRoot()
     }
     
@@ -97,7 +97,7 @@ class CanvasView: UIView {
         }
         // objectif 1: get apha = radii and beta
         //          1-1: beta
-        let beta = asin(diffR / pythagore(c1: diffX, c2: diffY))
+        let beta = asin(diffR / reciprocalPythagore(c1: diffX, c2: diffY))
         //          1-2: radii
         let radii =  -1 * (atan(diffY / diffX))
         //          1-3: alpha
@@ -112,6 +112,19 @@ class CanvasView: UIView {
         let yT2 = y2 + r2 * sin((CGFloat.pi / 2) - alpha)
         
         drawLine(p1: CGPoint(x: xT1, y: yT1), p2: CGPoint(x: xT2, y: yT2))
+        
+        // formula https://fr.wikipedia.org/wiki/Loi_des_cosinus
+        
+        // objectif 4: x and y of the second tangent from circle1
+        
+        let xT4 = x1 + r1 * cos(((3 * CGFloat.pi) / 2) - alpha)
+        let yT4 = y1 + r1 * sin(((3 * CGFloat.pi) / 2) - alpha)
+        
+        // objectif 5: x and y of the second tangent from circle2
+        let xT5 = x2 + r2 * cos(((3 * CGFloat.pi) / 2) - alpha)
+        let yT5 = y2 + r2 * sin(((3 * CGFloat.pi) / 2) - alpha)
+        
+        drawLine(p1: CGPoint(x: xT4, y: yT4), p2: CGPoint(x: xT5, y: yT5))
     }
     
     func clearCanvas() {
