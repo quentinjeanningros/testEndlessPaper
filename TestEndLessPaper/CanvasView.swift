@@ -16,51 +16,84 @@ struct Circle {
 
 class CanvasView: UIView {
     
+    var backColor: UIColor!
     var lineColor: UIColor!
     var lineWidth: CGFloat!
     var touchPoint: CGPoint!
-    
     var circleArray: Array<Circle> = Array()
-    
-    var counter: Int = 1
+    var circle: Circle!
     
     override func layoutSubviews() {
         self.clipsToBounds = true
         self.isMultipleTouchEnabled = false
         
+        backColor = UIColor.white
         lineColor = UIColor.black
         lineWidth = 5
     }
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = UIColor.clear
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+        
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
-            drawCircle(center: (touch?.location(in: self ))!)
-            if (circleArray.count > 1) {
-                circleArray.forEach { circle1 in
-                    circleArray.forEach { circle2 in
-                        if (circle2.path != circle1.path) {
-                            drawTangant(x1: circle1.center.x, y1: circle1.center.y, r1: circle1.radius, x2: circle2.center.x, y2: circle2.center.y, r2: circle2.radius)
-                        }
-                    }
-                }
-            }
+            touchPoint = touch?.location(in: self )
         }
     }
     
-    func drawCircle(center: CGPoint) {
-        let radius = CGFloat(20 + Int.random(in: 0..<40))
+    override public func draw(_ rect: CGRect)
+    {
+        if let ctx = UIGraphicsGetCurrentContext()
+        {
+            ctx.setLineWidth(lineWidth);
+            lineColor.set();
+            ctx.addArc(center: circle.center, radius: circle.radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
+            circleArray.forEach { it in
+                
+                if (circle.path != it.path) {
+                    drawTangant(x1: circle.center.x, y1: circle.center.y, r1: circle.radius, x2: it.center.x, y2: it.center.y, r2: it.radius)
+                }
+            }
+            ctx.fill(rect)
+        }
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first
+        if (touch != nil) {
+            let point = touch!.location(in: self)
+            let x = point.x - touchPoint.x
+            let y = point.y - touchPoint.y
+            let size = ((x * x) + (y * y)).squareRoot();
+            circle = drawCircle(center: touchPoint, radius: size)
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        circleArray.append(circle)
+    }
+    
+    func drawCircle(center: CGPoint, radius: CGFloat) -> Circle{
         let circlePath = UIBezierPath(arcCenter: center, radius: radius, startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
         
-        circleArray.append(Circle(path: circlePath, center: center, radius: radius))
-        let shapeLayer = CAShapeLayer()
-        shapeLayer.path = circlePath.cgPath
-
-        shapeLayer.strokeColor = lineColor.cgColor
-        shapeLayer.lineWidth = lineWidth
-        shapeLayer.fillColor = UIColor.clear.cgColor
-        self.layer.addSublayer(shapeLayer)
-        self.setNeedsDisplay()
+        let circle = Circle(path: circlePath, center: center, radius: radius)
+//        let shapeLayer = CAShapeLayer()
+//        shapeLayer.path = circlePath.cgPath
+//
+//        shapeLayer.strokeColor = lineColor.cgColor
+//        shapeLayer.lineWidth = lineWidth
+//        shapeLayer.fillColor = UIColor.clear.cgColor
+//        self.layer.addSublayer(shapeLayer)
+//        self.setNeedsDisplay()
+        
+        return (circle)
     }
     
     func drawLine(p1: CGPoint, p2: CGPoint) {
@@ -87,14 +120,8 @@ class CanvasView: UIView {
     
     func drawTangant(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat) {
         // formula https://en.wikipedia.org/wiki/Tangent_lines_to_circles
-        var diffX = x2 - x1
-        var diffY = y2 - y1
-        var diffR = r2 - r1
-        if (r2 < r1) {
-            diffX = x1 - x2
-            diffY = y1 - y2
-            diffR = r1 - r2
-        }
+        let (diffX, diffY, diffR) = r2 < r1 ? ((x1 - x2), (y1 - y2), (r1 - r2)) : ((x2 - x1), (y2 - y1), (r2 - r1))
+
         // objectif 1: get apha = radii and beta
         //          1-1: beta
         let beta = asin(diffR / reciprocalPythagore(c1: diffX, c2: diffY))
@@ -111,12 +138,7 @@ class CanvasView: UIView {
         let xT2 = x2 + r2 * cos((CGFloat.pi / 2) - alpha)
         let yT2 = y2 + r2 * sin((CGFloat.pi / 2) - alpha)
         
-        drawLine(p1: CGPoint(x: xT1, y: yT1), p2: CGPoint(x: xT2, y: yT2))
-        
-        // formula https://fr.wikipedia.org/wiki/Loi_des_cosinus
-        
         // objectif 4: x and y of the second tangent from circle1
-        
         let xT4 = x1 + r1 * cos(((3 * CGFloat.pi) / 2) - alpha)
         let yT4 = y1 + r1 * sin(((3 * CGFloat.pi) / 2) - alpha)
         
@@ -124,6 +146,7 @@ class CanvasView: UIView {
         let xT5 = x2 + r2 * cos(((3 * CGFloat.pi) / 2) - alpha)
         let yT5 = y2 + r2 * sin(((3 * CGFloat.pi) / 2) - alpha)
         
+        drawLine(p1: CGPoint(x: xT1, y: yT1), p2: CGPoint(x: xT2, y: yT2))
         drawLine(p1: CGPoint(x: xT4, y: yT4), p2: CGPoint(x: xT5, y: yT5))
     }
     
@@ -134,12 +157,4 @@ class CanvasView: UIView {
         self.setNeedsDisplay()
     }
     
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
-    }
-    */
-
 }
