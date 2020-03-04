@@ -9,14 +9,13 @@
 import UIKit
 
 struct Circle {
-    var path: UIBezierPath
+    var id : Int
     var center: CGPoint
     var radius: CGFloat
 }
 
 class CanvasView: UIView {
     
-    var backColor: UIColor!
     var lineColor: UIColor!
     var lineWidth: CGFloat!
     var touchPoint: CGPoint!
@@ -27,18 +26,8 @@ class CanvasView: UIView {
         self.clipsToBounds = true
         self.isMultipleTouchEnabled = false
         
-        backColor = UIColor.white
         lineColor = UIColor.black
         lineWidth = 5
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        backgroundColor = UIColor.clear
-    }
-    
-    required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
         
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -52,16 +41,21 @@ class CanvasView: UIView {
     {
         if let ctx = UIGraphicsGetCurrentContext()
         {
-            ctx.setLineWidth(lineWidth);
-            lineColor.set();
-            ctx.addArc(center: circle.center, radius: circle.radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
+            ctx.setLineWidth(lineWidth)
+            ctx.setStrokeColor(lineColor.cgColor)
+            if (circle != nil) {
+                ctx.addEllipse(in: CGRect(x: circle.center.x, y: circle.center.y ,width: circle.radius, height: circle.radius))
+            }
             circleArray.forEach { it in
-                
-                if (circle.path != it.path) {
+                ctx.addEllipse(in: CGRect(x: it.center.x, y: it.center.y ,width: it.radius, height: it.radius))
+                drawTangant(x1: circle.center.x, y1: circle.center.y, r1: circle.radius, x2: it.center.x, y2: it.center.y, r2: it.radius)
+                circleArray.forEach { it2 in
+                    ctx.addEllipse(in: CGRect(x: it.center.x, y: it.center.y ,width: it.radius, height: it.radius))
                     drawTangant(x1: circle.center.x, y1: circle.center.y, r1: circle.radius, x2: it.center.x, y2: it.center.y, r2: it.radius)
+                    
                 }
             }
-            ctx.fill(rect)
+            ctx.strokePath()
         }
     }
     
@@ -72,29 +66,18 @@ class CanvasView: UIView {
             let x = point.x - touchPoint.x
             let y = point.y - touchPoint.y
             let size = ((x * x) + (y * y)).squareRoot();
-            circle = drawCircle(center: touchPoint, radius: size)
+            circle = Circle(id: -1, center: touchPoint, radius: size)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        circleArray.append(circle)
+        print(circle.center)
+        print(circle.radius)
+        if (circle != nil) {
+            circleArray.append(Circle(id : circleArray.count > 0 ? circleArray.last!.id + 1 : 0 ,center: circle.center, radius: circle.radius))
+        }
     }
     
-    func drawCircle(center: CGPoint, radius: CGFloat) -> Circle{
-        let circlePath = UIBezierPath(arcCenter: center, radius: radius, startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
-        
-        let circle = Circle(path: circlePath, center: center, radius: radius)
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.path = circlePath.cgPath
-//
-//        shapeLayer.strokeColor = lineColor.cgColor
-//        shapeLayer.lineWidth = lineWidth
-//        shapeLayer.fillColor = UIColor.clear.cgColor
-//        self.layer.addSublayer(shapeLayer)
-//        self.setNeedsDisplay()
-        
-        return (circle)
-    }
     
     func drawLine(p1: CGPoint, p2: CGPoint) {
         let line = UIBezierPath()
@@ -151,7 +134,6 @@ class CanvasView: UIView {
     }
     
     func clearCanvas() {
-        circleArray.forEach { circle in circle.path.removeAllPoints()}
         circleArray.removeAll()
         self.layer.sublayers = nil
         self.setNeedsDisplay()

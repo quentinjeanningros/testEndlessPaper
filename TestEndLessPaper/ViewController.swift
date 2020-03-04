@@ -13,8 +13,6 @@ class ViewController: UIViewController {
     @IBOutlet weak var canvasView: CanvasView!
     override func viewDidLoad() {
         super.viewDidLoad()
-            
-        view.backgroundColor = UIColor.lightGray
     }
 
     @IBAction func clearCanvas(_ sender: Any) {
