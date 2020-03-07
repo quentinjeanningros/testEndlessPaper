@@ -114,53 +114,47 @@ class CanvasView: UIView {
         if (r1 == r2) {
             return (calcTangantEqual(x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2))
         }
+        
         let (sX, sY, sR, bX, bY, bR) = r2 > r1 ? (x1, y1, r1, x2, y2, r2) : (x2, y2, r2, x1, y1, r1)
-
-        // objectif 1: get intersection points of the outer tangants
+        
+        // objectif 1: get intersection point of the outer tangants
         let xP = (sX * bR - bX * sR) / (bR - sR)
         let yP = (sY * bR - bY * sR) / (bR - sR)
         
-        // objectif 2: get tangant point of circle2
-        let s2 = calcTangantPoint(xP: xP, yP: yP, x: bX, y: bY, r: bR)
+        // objectif 2: get Bigger Cirle Points
+        let bCP = calcTangantPoint(xP: xP, yP: yP, x: bX, y: bY, r: bR)
 
-        // objectif 3: get tangant point of circle1
-        let s1 = calcTangantPoint(xP: xP, yP: yP, x: sX, y: sY, r: sR)
-        
-        // objectif 4: get intersection points of the outer tangants 2
-        let xP2 = (bX * sR - sX * bR) / (sR - bR)
-        let yP2 = (bY * sR - sY * bR) / (sR - bR)
-        
-        // objectif 5: get tangant 2 point of circle2
-        let s3 = calcTangantPoint(xP: xP2, yP: yP2, x: sX, y: sY, r: sR)
+        // objectif 3: get Smaller Cirle Points
+        let sCP = calcTangantPoint(xP: xP, yP: yP, x: sX, y: sY, r: sR)
 
-        // objectif 6: get tangant 2 point of circle1
-        let s4 = calcTangantPoint(xP: xP2, yP: yP2, x: bX, y: bY, r: bR)
-
-        return ([s1, s2, s3, s4])
+        return ([bCP[0], sCP[0], bCP[1], sCP[1]])
         
     }
     
-    func calcTangantPoint(xP: CGFloat, yP: CGFloat, x: CGFloat, y: CGFloat, r: CGFloat) -> CGPoint {
+    func calcTangantPoint(xP: CGFloat, yP: CGFloat, x: CGFloat, y: CGFloat, r: CGFloat) -> Array<CGPoint> {
+        // formula http://www.ambrsoft.com/TrigoCalc/Circles2/Circles2Tangent_.htm
+        
+        // objectif 1: distance between the intersection point of tangants and the center of the circle
         let dirX = xP - x
         let dirY = yP - y
+        
         let rSquare = r * r
         let dirSquare = (dirX * dirX) + (dirY * dirY)
+        
+        // objectif 2: distance between the intersection point of tangants and circle tangant point (pythagore)
         let root = (dirSquare - rSquare).squareRoot()
         
-        let xt = (((rSquare * dirX) + (r * dirY * root)) / (dirSquare)) + x
-        var yt = (((rSquare * dirY) - (r * dirX * root)) / (dirSquare)) + y
-        let s = ((y - yt) * (yP - yt)) / ((xt - x) * (xt - xP))
-        let round = ((1000 * s)/1000).rounded()
+        // objectif 3: get the 2 intersections points between tangants and the circle
+        let xt1 = (((rSquare * dirX) + (r * dirY * root)) / (dirSquare)) + x
+        let yt1 = (((rSquare * dirY) + (r * dirX * root)) / (dirSquare)) + y
         
-        print("/////////")
-        print(round)
-        if (s != -1 || s != 1) {
-            yt = (((rSquare * dirY) + (r * dirX * root)) / (dirSquare)) + y
-            let s2 = ((y - yt) * (yP - yt)) / ((xt - x) * (xt - xP))
-            let round = ((1000 * s2)/1000).rounded()
-            print(round)
-        }
-        return (CGPoint(x: xt, y: yt))
+        let xt2 = (((rSquare * dirX) - (r * dirY * root)) / (dirSquare)) + x
+        let yt2 = (((rSquare * dirY) - (r * dirX * root)) / (dirSquare)) + y
+
+        // objectif 4: check which pair create tangants
+        let s = ((y - yt1) * (yP - yt1)) / ((xt1 - x) * (xt1 - xP))
+
+        return (s == 1 ? ([CGPoint(x: xt1, y: yt1), CGPoint(x: xt2, y: yt2)]) : ([CGPoint(x: xt1, y: yt2), CGPoint(x: xt2, y: yt1)]))
     }
     
     func calcTangantEqual(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat) -> Array<CGPoint> {
