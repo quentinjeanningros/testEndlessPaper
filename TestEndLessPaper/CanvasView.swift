@@ -16,6 +16,8 @@ struct Circle {
 
 class CanvasView: UIView {
     
+    var editMode : Bool = false;
+    
     var lineColor: UIColor!
     var lineWidth: CGFloat!
     var touchPoint: CGPoint!
@@ -52,8 +54,15 @@ class CanvasView: UIView {
                                           height: it.radius * 2))
             }
             var store : Array<Int> = Array()
+            ctx.strokePath()
+            
+            
+            // draw tangant
+            ctx.setLineWidth((lineWidth - 1.5) > 1 ? lineWidth - 1.5 : 1)
             circleArray.forEach { it in
-                drawTangant(c1: it, c2: circle, ctx: ctx)
+                if (circle != nil) {
+                    drawTangant(c1: it, c2: circle, ctx: ctx)
+                }
                 circleArray.forEach { it2 in
                     if (it.id != it2.id && store.contains(it2.id)) {
                         drawTangant(c1: it, c2: it2, ctx: ctx)
@@ -62,8 +71,21 @@ class CanvasView: UIView {
                 store.append(it.id)
             }
             ctx.strokePath()
+            
+            
+            if (editMode) {
+                print("ok")
+                // draw move cross
+                ctx.setLineWidth((lineWidth - 2.5) > 1 ? lineWidth - 2.5 : 1)
+                circleArray.forEach { it in
+                    drawLine(p1: CGPoint(x: it.center.x - 5, y: it.center.y), p2: CGPoint(x: it.center.x + 5, y: it.center.y), ctx: ctx, rounded: true)
+                    drawLine(p1: CGPoint(x: it.center.x, y: it.center.y - 5), p2: CGPoint(x: it.center.x, y: it.center.y + 5), ctx: ctx, rounded: true)
+                }
+                ctx.strokePath()
+            }
         }
     }
+    
 
     func drawTangant(c1: Circle, c2: Circle, ctx: CGContext) {
         let tangant = drawTangant(x1: c1.center.x,
@@ -72,37 +94,54 @@ class CanvasView: UIView {
                                   x2: c2.center.x,
                                   y2: c2.center.y,
                                   r2: c2.radius)
-        drawLine(p1: tangant[0], p2: tangant[1], ctx: ctx)
-        drawLine(p1: tangant[2], p2: tangant[3], ctx: ctx)
+        drawLine(p1: tangant[0], p2: tangant[1], ctx: ctx, rounded: false)
+        drawLine(p1: tangant[2], p2: tangant[3], ctx: ctx, rounded: false)
     }
     
-    func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext) {
+    func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, rounded: Bool) {
         ctx.move(to: p1)
         ctx.addLine(to: p2)
+        if (rounded) {
+            ctx.setLineCap(CGLineCap.round)
+        }
+        else {
+            ctx.setLineCap(CGLineCap.butt)
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
-            touchPoint = touch?.location(in: self )
+            if (editMode) {
+                print("todo start")
+            } else {
+                touchPoint = touch?.location(in: self )
+            }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
-            let point = touch!.location(in: self)
-            let x = point.x - touchPoint.x
-            let y = point.y - touchPoint.y
-            let value = reciprocalPythagore(c1: x, c2: y)
-            circle = Circle(id: -1, center: touchPoint, radius: value >= 10 ? value : 10)
-            self.setNeedsDisplay()
+             if (editMode) {
+                       print("todo move")
+             } else {
+                let point = touch!.location(in: self)
+                let x = point.x - touchPoint.x
+                let y = point.y - touchPoint.y
+                let value = reciprocalPythagore(c1: x, c2: y)
+                circle = Circle(id: -1, center: touchPoint, radius: value >= 10 ? value : 10)
+                self.setNeedsDisplay()
+            }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (circle != nil) {
+        if (editMode) {
+            print("todo end")
+        } else if (circle != nil) {
             circleArray.append(Circle(id : circleArray.count > 0 ? circleArray.last!.id + 1 : 0 ,center: circle.center, radius: circle.radius))
+            circle = nil
         }
     }
     
@@ -192,6 +231,11 @@ class CanvasView: UIView {
         circle = nil
         circleArray.removeAll()
         self.layer.sublayers = nil
+        self.setNeedsDisplay()
+    }
+    
+    func toggleEditMode(mode : Bool) {
+        editMode = mode
         self.setNeedsDisplay()
     }
     

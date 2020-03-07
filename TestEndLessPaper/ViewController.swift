@@ -14,11 +14,19 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-
-    @IBAction func clearCanvas(_ sender: Any) {
-        canvasView.clearCanvas()
+    
+    @IBOutlet weak var EditSwitch: UISwitch!
+    
+    @IBAction func toggleEdit(_ sender: UISwitch) {
+        canvasView.toggleEditMode(mode: sender.isOn)
     }
     
+    @IBAction func clearCanvas(_ sender: Any) {
+        canvasView.clearCanvas()
+        EditSwitch.setOn(false, animated: true)
+        canvasView.toggleEditMode(mode: false)
+        
+    }
     
 }
 
