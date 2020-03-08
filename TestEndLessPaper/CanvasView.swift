@@ -13,16 +13,17 @@ struct Circle {
     var center: CGPoint
     var radius: CGFloat
     var select: Bool = false
+    var resize: Bool = false
 }
 
 class CanvasView: UIView {
     
-    // utils
+// UTILS PART //
     var editMode : Bool = false;
     var circleArray: Array<Circle> = Array()
     var circle: Circle!
     
-    // params
+// PARAMS PART //
     var lineColor: UIColor!
     var lineColorSelect: UIColor!
     var lineWidth: CGFloat!
@@ -39,18 +40,17 @@ class CanvasView: UIView {
         crossSize = 5
     }
     
+// DISPLAY PART //
+    
     override public func draw(_ rect: CGRect)
     {
         if let ctx = UIGraphicsGetCurrentContext()
         {
-            ctx.setStrokeColor(lineColor.cgColor)
-            ctx.setLineWidth(lineWidth)
-
-            // draw circle
-            displayCircle(ctx: ctx)
-            
             // draw tangant
             displayTangant(ctx: ctx)
+            
+            // draw circle
+            displayCircle(ctx: ctx)
             
             // draw move cross
             if (editMode) {displayCross(ctx: ctx)}
@@ -59,6 +59,10 @@ class CanvasView: UIView {
     }
     
     func displayCircle(ctx: CGContext) {
+        ctx.setLineWidth(lineWidth)
+        if (!editMode) {
+            ctx.setStrokeColor(lineColor.cgColor)
+        }
         if (circle != nil) {
             ctx.addEllipse(in: CGRect(x: circle.center.x - circle.radius,
                                       y: circle.center.y - circle.radius,
@@ -66,6 +70,9 @@ class CanvasView: UIView {
                                       height: circle.radius * 2))
         }
         circleArray.forEach { it in
+            if (editMode) {
+                ctx.setStrokeColor(it.resize ? lineColorSelect.cgColor : lineColor.cgColor)
+            }
             ctx.addEllipse(in: CGRect(x: it.center.x - it.radius,
                                       y: it.center.y - it.radius,
                                       width: it.radius * 2,
@@ -95,16 +102,25 @@ class CanvasView: UIView {
     func displayCross(ctx: CGContext) {
         ctx.setLineWidth((lineWidth - 2.5) > 1 ? lineWidth - 2.5 : 1)
         circleArray.forEach { it in
-            drawLine(p1: CGPoint(x: it.center.x - crossSize, y: it.center.y),
+            displayLine(p1: CGPoint(x: it.center.x - crossSize, y: it.center.y),
                      p2: CGPoint(x: it.center.x + crossSize, y: it.center.y),
                      ctx: ctx, rounded: true, color: it.select ? lineColorSelect : lineColor)
-            drawLine(p1: CGPoint(x: it.center.x, y: it.center.y - crossSize),
+            displayLine(p1: CGPoint(x: it.center.x, y: it.center.y - crossSize),
                      p2: CGPoint(x: it.center.x, y: it.center.y + crossSize),
                      ctx: ctx, rounded: true, color: it.select ? lineColorSelect : lineColor)
             ctx.strokePath()
         }
     }
+    
+    func displayLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, rounded: Bool, color: UIColor) {
+        ctx.move(to: p1)
+        ctx.addLine(to: p2)
+        ctx.setStrokeColor(color.cgColor)
+        ctx.setLineCap(rounded ? CGLineCap.round : CGLineCap.butt)
+    }
 
+// DRAW PART //
+    
     func drawTangant(c1: Circle, c2: Circle, ctx: CGContext) {
         let tangant = drawTangant(x1: c1.center.x,
                                   y1: c1.center.y,
@@ -112,21 +128,32 @@ class CanvasView: UIView {
                                   x2: c2.center.x,
                                   y2: c2.center.y,
                                   r2: c2.radius)
-        drawLine(p1: tangant[0], p2: tangant[1], ctx: ctx, rounded: false, color: lineColor)
-        drawLine(p1: tangant[2], p2: tangant[3], ctx: ctx, rounded: false, color: lineColor)
+        displayLine(p1: tangant[0], p2: tangant[1], ctx: ctx, rounded: false, color: lineColor)
+        displayLine(p1: tangant[2], p2: tangant[3], ctx: ctx, rounded: false, color: lineColor)
     }
     
-    func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, rounded: Bool, color: UIColor) {
-        ctx.move(to: p1)
-        ctx.addLine(to: p2)
-        ctx.setStrokeColor(color.cgColor)
-        if (rounded) {
-            ctx.setLineCap(CGLineCap.round)
-        }
-        else {
-            ctx.setLineCap(CGLineCap.butt)
-        }
-    }
+    func drawTangant(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat)-> Array<CGPoint>  {
+          if (r1 == r2) {
+              return (calcTangantEqual(x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2))
+          }
+          
+          let (sX, sY, sR, bX, bY, bR) = r2 > r1 ? (x1, y1, r1, x2, y2, r2) : (x2, y2, r2, x1, y1, r1)
+          
+          // objectif 1: get intersection point of the outer tangants
+          let xP = (sX * bR - bX * sR) / (bR - sR)
+          let yP = (sY * bR - bY * sR) / (bR - sR)
+          
+          // objectif 2: get Bigger Cirle Points
+          let bCP = calcTangantPoint(xP: xP, yP: yP, x: bX, y: bY, r: bR)
+
+          // objectif 3: get Smaller Cirle Points
+          let sCP = calcTangantPoint(xP: xP, yP: yP, x: sX, y: sY, r: sR)
+
+          return ([bCP[0], sCP[0], bCP[1], sCP[1]])
+          
+      }
+    
+// ACTION PART //
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
@@ -136,12 +163,19 @@ class CanvasView: UIView {
                 var edit = false
                 var index = 0
                 while index < circleArray.count {
-                    if (reciprocalPythagore(c1: touchPoint.x - circleArray[index].center.x, c2: touchPoint.y - circleArray[index].center.y) <= crossSize + 5) {
+                    let size = reciprocalPythagore(c1: touchPoint.x - circleArray[index].center.x, c2: touchPoint.y - circleArray[index].center.y)
+                    if (size <= crossSize + 5) {
                         circleArray[index].select = true
                         edit = true
-                    }
-                    else if (circleArray[index].select) {
+                    } else if (circleArray[index].select) {
                         circleArray[index].select = false
+                        edit = true
+                    }
+                    if (size <=  circleArray[index].radius + 5 && size >= circleArray[index].radius  - 5) {
+                        circleArray[index].resize = true
+                        edit = true
+                    } else if (circleArray[index].select) {
+                        circleArray[index].resize = false
                         edit = true
                     }
                     index += 1
@@ -165,6 +199,11 @@ class CanvasView: UIView {
                         circleArray[index].center = point
                         edit = true
                     }
+                    if (circleArray[index].resize == true) {
+                        let value = reciprocalPythagore(c1: point.x - circleArray[index].center.x, c2: point.y - circleArray[index].center.y)
+                        circleArray[index].radius = value >= 10 ? value : 10
+                        edit = true
+                    }
                     index += 1
                 }
             } else {
@@ -179,35 +218,41 @@ class CanvasView: UIView {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (circle != nil) {
+        if (editMode) {
+            var edit = false
+            var index = 0
+            while index < circleArray.count {
+                if (circleArray[index].resize == true) {
+                    circleArray[index].resize = false
+                    edit = true
+                }
+                index += 1
+            }
+            if (edit) {
+                self.setNeedsDisplay()
+            }
+        } else if (circle != nil) {
             circleArray.append(Circle(id : circleArray.count > 0 ? circleArray.last!.id + 1 : 0 ,center: circle.center, radius: circle.radius))
             circle = nil
         }
     }
     
-    func reciprocalPythagore(c1: CGFloat, c2: CGFloat) -> CGFloat {
-        return (c1 * c1 + c2 * c2).squareRoot()
+    func clearCanvas() {
+        circle = nil
+        circleArray.removeAll()
+        self.layer.sublayers = nil
+        self.setNeedsDisplay()
     }
     
-    func drawTangant(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat)-> Array<CGPoint>  {
-        if (r1 == r2) {
-            return (calcTangantEqual(x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2))
-        }
-        
-        let (sX, sY, sR, bX, bY, bR) = r2 > r1 ? (x1, y1, r1, x2, y2, r2) : (x2, y2, r2, x1, y1, r1)
-        
-        // objectif 1: get intersection point of the outer tangants
-        let xP = (sX * bR - bX * sR) / (bR - sR)
-        let yP = (sY * bR - bY * sR) / (bR - sR)
-        
-        // objectif 2: get Bigger Cirle Points
-        let bCP = calcTangantPoint(xP: xP, yP: yP, x: bX, y: bY, r: bR)
-
-        // objectif 3: get Smaller Cirle Points
-        let sCP = calcTangantPoint(xP: xP, yP: yP, x: sX, y: sY, r: sR)
-
-        return ([bCP[0], sCP[0], bCP[1], sCP[1]])
-        
+    func toggleEditMode(mode : Bool) {
+        editMode = mode
+        self.setNeedsDisplay()
+    }
+    
+// MATH PART //
+    
+    func reciprocalPythagore(c1: CGFloat, c2: CGFloat) -> CGFloat {
+        return (c1 * c1 + c2 * c2).squareRoot()
     }
     
     func calcTangantPoint(xP: CGFloat, yP: CGFloat, x: CGFloat, y: CGFloat, r: CGFloat) -> Array<CGPoint> {
@@ -265,18 +310,6 @@ class CanvasView: UIView {
         let yT5 = y2 + r2 * sin(((3 * CGFloat.pi) / 2) - alpha)
         
         return ([CGPoint(x: xT1, y: yT1), CGPoint(x: xT2, y: yT2), CGPoint(x: xT4, y: yT4), CGPoint(x: xT5, y: yT5)])
-    }
-    
-    func clearCanvas() {
-        circle = nil
-        circleArray.removeAll()
-        self.layer.sublayers = nil
-        self.setNeedsDisplay()
-    }
-    
-    func toggleEditMode(mode : Bool) {
-        editMode = mode
-        self.setNeedsDisplay()
     }
     
 }
