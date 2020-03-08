@@ -29,6 +29,7 @@ class CanvasView: UIView {
     var lineWidth: CGFloat!
     var touchPoint: CGPoint!
     var crossSize: CGFloat!
+    var selected: UnsafeMutablePointer<Circle>!
     
     override func layoutSubviews() {
         self.clipsToBounds = true
@@ -165,18 +166,16 @@ class CanvasView: UIView {
                 while index < circleArray.count {
                     let size = reciprocalPythagore(c1: touchPoint.x - circleArray[index].center.x, c2: touchPoint.y - circleArray[index].center.y)
                     if (size <= crossSize + 5) {
+                        selected = UnsafeMutablePointer<Circle>(&circleArray) + index
                         circleArray[index].select = true
                         edit = true
-                    } else if (circleArray[index].select) {
-                        circleArray[index].select = false
-                        edit = true
+                        break
                     }
                     if (size <=  circleArray[index].radius + 5 && size >= circleArray[index].radius  - 5) {
+                        selected = UnsafeMutablePointer<Circle>(&circleArray) + index
                         circleArray[index].resize = true
                         edit = true
-                    } else if (circleArray[index].select) {
-                        circleArray[index].resize = false
-                        edit = true
+                        break
                     }
                     index += 1
                 }
@@ -191,46 +190,28 @@ class CanvasView: UIView {
         let touch = touches.first
         if (touch != nil) {
             let point = touch!.location(in: self)
-            var edit = false
-            if (editMode) {
-                var index = 0
-                while index < circleArray.count {
-                    if (circleArray[index].select == true) {
-                        circleArray[index].center = point
-                        edit = true
-                    }
-                    if (circleArray[index].resize == true) {
-                        let value = reciprocalPythagore(c1: point.x - circleArray[index].center.x, c2: point.y - circleArray[index].center.y)
-                        circleArray[index].radius = value >= 15 ? value : 15
-                        edit = true
-                    }
-                    index += 1
+            if (editMode && selected != nil) {
+                if (selected.pointee.select == true) {
+                    selected.pointee.center = point
+                }
+                if (selected.pointee.resize == true) {
+                    let value = reciprocalPythagore(c1: point.x - selected.pointee.center.x, c2: point.y - selected.pointee.center.y)
+                    selected.pointee.radius = value >= 15 ? value : 15
                 }
             } else {
                 let value = reciprocalPythagore(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
                 circle = Circle(id: -1, center: touchPoint, radius: value >= 15 ? value : 15)
-                edit = true
             }
-            if (edit) {
-                self.setNeedsDisplay()
-            }
+            self.setNeedsDisplay()
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (editMode) {
-            var edit = false
-            var index = 0
-            while index < circleArray.count {
-                if (circleArray[index].resize == true) {
-                    circleArray[index].resize = false
-                    edit = true
-                }
-                index += 1
-            }
-            if (edit) {
-                self.setNeedsDisplay()
-            }
+        if (editMode && selected != nil) {
+            selected.pointee.select = false
+            selected.pointee.resize = false
+            selected = nil
+            self.setNeedsDisplay()
         } else if (circle != nil) {
             circleArray.append(Circle(id : circleArray.count > 0 ? circleArray.last!.id + 1 : 0 ,center: circle.center, radius: circle.radius))
             circle = nil
