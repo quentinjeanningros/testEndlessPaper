@@ -201,14 +201,14 @@ class CanvasView: UIView {
                     }
                     if (circleArray[index].resize == true) {
                         let value = reciprocalPythagore(c1: point.x - circleArray[index].center.x, c2: point.y - circleArray[index].center.y)
-                        circleArray[index].radius = value >= 10 ? value : 10
+                        circleArray[index].radius = value >= 15 ? value : 15
                         edit = true
                     }
                     index += 1
                 }
             } else {
                 let value = reciprocalPythagore(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
-                circle = Circle(id: -1, center: touchPoint, radius: value >= 10 ? value : 10)
+                circle = Circle(id: -1, center: touchPoint, radius: value >= 15 ? value : 15)
                 edit = true
             }
             if (edit) {
