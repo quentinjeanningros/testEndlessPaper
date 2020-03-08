@@ -92,7 +92,10 @@ class CanvasView: UIView {
             }
             circleArray.forEach { it2 in
                 if (it.id != it2.id && store.contains(it2.id)) {
-                    drawTangant(c1: it, c2: it2, ctx: ctx)
+                    let size = reciprocalPythagore(c1: it.center.x - it2.center.x, c2: it.center.y - it2.center.y)
+                    if (size + it2.radius > it.radius && size + it.radius > it2.radius) {
+                        drawTangant(c1: it, c2: it2, ctx: ctx)
+                    }
                 }
             }
             store.append(it.id)
@@ -161,26 +164,20 @@ class CanvasView: UIView {
         if (touch != nil) {
             touchPoint = touch?.location(in: self )
             if (editMode) {
-                var edit = false
                 var index = 0
                 while index < circleArray.count {
                     let size = reciprocalPythagore(c1: touchPoint.x - circleArray[index].center.x, c2: touchPoint.y - circleArray[index].center.y)
                     if (size <= crossSize + 5) {
                         selected = UnsafeMutablePointer<Circle>(&circleArray) + index
                         circleArray[index].select = true
-                        edit = true
                         break
                     }
                     if (size <=  circleArray[index].radius + 5 && size >= circleArray[index].radius  - 5) {
                         selected = UnsafeMutablePointer<Circle>(&circleArray) + index
                         circleArray[index].resize = true
-                        edit = true
                         break
                     }
                     index += 1
-                }
-                if (edit) {
-                    self.setNeedsDisplay()
                 }
             }
         }
@@ -198,7 +195,7 @@ class CanvasView: UIView {
                     let value = reciprocalPythagore(c1: point.x - selected.pointee.center.x, c2: point.y - selected.pointee.center.y)
                     selected.pointee.radius = value >= 15 ? value : 15
                 }
-            } else {
+            } else if (editMode == false) {
                 let value = reciprocalPythagore(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
                 circle = Circle(id: -1, center: touchPoint, radius: value >= 15 ? value : 15)
             }
