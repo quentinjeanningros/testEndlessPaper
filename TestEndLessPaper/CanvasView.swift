@@ -12,24 +12,31 @@ struct Circle {
     var id : Int
     var center: CGPoint
     var radius: CGFloat
+    var select: Bool = false
 }
 
 class CanvasView: UIView {
     
+    // utils
     var editMode : Bool = false;
-    
-    var lineColor: UIColor!
-    var lineWidth: CGFloat!
-    var touchPoint: CGPoint!
     var circleArray: Array<Circle> = Array()
     var circle: Circle!
+    
+    // params
+    var lineColor: UIColor!
+    var lineColorSelect: UIColor!
+    var lineWidth: CGFloat!
+    var touchPoint: CGPoint!
+    var crossSize: CGFloat!
     
     override func layoutSubviews() {
         self.clipsToBounds = true
         self.isMultipleTouchEnabled = false
         
         lineColor = UIColor.black
+        lineColorSelect = UIColor.link
         lineWidth = 5
+        crossSize = 5
     }
     
     override public func draw(_ rect: CGRect)
@@ -37,55 +44,66 @@ class CanvasView: UIView {
         if let ctx = UIGraphicsGetCurrentContext()
         {
             ctx.setStrokeColor(lineColor.cgColor)
- 
-            // draw circle
             ctx.setLineWidth(lineWidth)
-            
-            if (circle != nil) {
-                ctx.addEllipse(in: CGRect(x: circle.center.x - circle.radius,
-                                          y: circle.center.y - circle.radius,
-                                          width: circle.radius * 2,
-                                          height: circle.radius * 2))
-            }
-            circleArray.forEach { it in
-                ctx.addEllipse(in: CGRect(x: it.center.x - it.radius,
-                                          y: it.center.y - it.radius,
-                                          width: it.radius * 2,
-                                          height: it.radius * 2))
-            }
-            var store : Array<Int> = Array()
-            ctx.strokePath()
-            
+
+            // draw circle
+            displayCircle(ctx: ctx)
             
             // draw tangant
-            ctx.setLineWidth((lineWidth - 1.5) > 1 ? lineWidth - 1.5 : 1)
-            circleArray.forEach { it in
-                if (circle != nil) {
-                    drawTangant(c1: it, c2: circle, ctx: ctx)
-                }
-                circleArray.forEach { it2 in
-                    if (it.id != it2.id && store.contains(it2.id)) {
-                        drawTangant(c1: it, c2: it2, ctx: ctx)
-                    }
-                }
-                store.append(it.id)
-            }
-            ctx.strokePath()
+            displayTangant(ctx: ctx)
             
+            // draw move cross
+            if (editMode) {displayCross(ctx: ctx)}
             
-            if (editMode) {
-                print("ok")
-                // draw move cross
-                ctx.setLineWidth((lineWidth - 2.5) > 1 ? lineWidth - 2.5 : 1)
-                circleArray.forEach { it in
-                    drawLine(p1: CGPoint(x: it.center.x - 5, y: it.center.y), p2: CGPoint(x: it.center.x + 5, y: it.center.y), ctx: ctx, rounded: true)
-                    drawLine(p1: CGPoint(x: it.center.x, y: it.center.y - 5), p2: CGPoint(x: it.center.x, y: it.center.y + 5), ctx: ctx, rounded: true)
-                }
-                ctx.strokePath()
-            }
         }
     }
     
+    func displayCircle(ctx: CGContext) {
+        if (circle != nil) {
+            ctx.addEllipse(in: CGRect(x: circle.center.x - circle.radius,
+                                      y: circle.center.y - circle.radius,
+                                      width: circle.radius * 2,
+                                      height: circle.radius * 2))
+        }
+        circleArray.forEach { it in
+            ctx.addEllipse(in: CGRect(x: it.center.x - it.radius,
+                                      y: it.center.y - it.radius,
+                                      width: it.radius * 2,
+                                      height: it.radius * 2))
+            if (editMode) {ctx.strokePath()}
+        }
+        if (!editMode) {ctx.strokePath()}
+    }
+    
+    func displayTangant(ctx: CGContext) {
+        var store : Array<Int> = Array()
+        ctx.setLineWidth((lineWidth - 1.5) > 1 ? lineWidth - 1.5 : 1)
+        circleArray.forEach { it in
+            if (circle != nil) {
+                drawTangant(c1: it, c2: circle, ctx: ctx)
+            }
+            circleArray.forEach { it2 in
+                if (it.id != it2.id && store.contains(it2.id)) {
+                    drawTangant(c1: it, c2: it2, ctx: ctx)
+                }
+            }
+            store.append(it.id)
+        }
+        ctx.strokePath()
+    }
+    
+    func displayCross(ctx: CGContext) {
+        ctx.setLineWidth((lineWidth - 2.5) > 1 ? lineWidth - 2.5 : 1)
+        circleArray.forEach { it in
+            drawLine(p1: CGPoint(x: it.center.x - crossSize, y: it.center.y),
+                     p2: CGPoint(x: it.center.x + crossSize, y: it.center.y),
+                     ctx: ctx, rounded: true, color: it.select ? lineColorSelect : lineColor)
+            drawLine(p1: CGPoint(x: it.center.x, y: it.center.y - crossSize),
+                     p2: CGPoint(x: it.center.x, y: it.center.y + crossSize),
+                     ctx: ctx, rounded: true, color: it.select ? lineColorSelect : lineColor)
+            ctx.strokePath()
+        }
+    }
 
     func drawTangant(c1: Circle, c2: Circle, ctx: CGContext) {
         let tangant = drawTangant(x1: c1.center.x,
@@ -94,13 +112,14 @@ class CanvasView: UIView {
                                   x2: c2.center.x,
                                   y2: c2.center.y,
                                   r2: c2.radius)
-        drawLine(p1: tangant[0], p2: tangant[1], ctx: ctx, rounded: false)
-        drawLine(p1: tangant[2], p2: tangant[3], ctx: ctx, rounded: false)
+        drawLine(p1: tangant[0], p2: tangant[1], ctx: ctx, rounded: false, color: lineColor)
+        drawLine(p1: tangant[2], p2: tangant[3], ctx: ctx, rounded: false, color: lineColor)
     }
     
-    func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, rounded: Bool) {
+    func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, rounded: Bool, color: UIColor) {
         ctx.move(to: p1)
         ctx.addLine(to: p2)
+        ctx.setStrokeColor(color.cgColor)
         if (rounded) {
             ctx.setLineCap(CGLineCap.round)
         }
@@ -112,10 +131,24 @@ class CanvasView: UIView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
+            touchPoint = touch?.location(in: self )
             if (editMode) {
-                print("todo start")
-            } else {
-                touchPoint = touch?.location(in: self )
+                var edit = false
+                var index = 0
+                while index < circleArray.count {
+                    if (reciprocalPythagore(c1: touchPoint.x - circleArray[index].center.x, c2: touchPoint.y - circleArray[index].center.y) <= crossSize + 5) {
+                        circleArray[index].select = true
+                        edit = true
+                    }
+                    else if (circleArray[index].select) {
+                        circleArray[index].select = false
+                        edit = true
+                    }
+                    index += 1
+                }
+                if (edit) {
+                    self.setNeedsDisplay()
+                }
             }
         }
     }
@@ -123,23 +156,30 @@ class CanvasView: UIView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
-             if (editMode) {
-                       print("todo move")
-             } else {
-                let point = touch!.location(in: self)
-                let x = point.x - touchPoint.x
-                let y = point.y - touchPoint.y
-                let value = reciprocalPythagore(c1: x, c2: y)
+            let point = touch!.location(in: self)
+            var edit = false
+            if (editMode) {
+                var index = 0
+                while index < circleArray.count {
+                    if (circleArray[index].select == true) {
+                        circleArray[index].center = point
+                        edit = true
+                    }
+                    index += 1
+                }
+            } else {
+                let value = reciprocalPythagore(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
                 circle = Circle(id: -1, center: touchPoint, radius: value >= 10 ? value : 10)
+                edit = true
+            }
+            if (edit) {
                 self.setNeedsDisplay()
             }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (editMode) {
-            print("todo end")
-        } else if (circle != nil) {
+        if (circle != nil) {
             circleArray.append(Circle(id : circleArray.count > 0 ? circleArray.last!.id + 1 : 0 ,center: circle.center, radius: circle.radius))
             circle = nil
         }
