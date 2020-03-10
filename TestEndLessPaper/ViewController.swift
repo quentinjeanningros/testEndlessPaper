@@ -12,10 +12,6 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var canvasView: CanvasView!
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
     @IBOutlet weak var EditSwitch: UISwitch!
     
     @IBAction func toggleEdit(_ sender: UISwitch) {
