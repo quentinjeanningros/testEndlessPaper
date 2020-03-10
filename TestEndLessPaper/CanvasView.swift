@@ -189,7 +189,8 @@ class CanvasView: UIView {
 // UTILS PART //
     var editMode : Bool = false;
     var circleArray: Array<Circle> = Array()
-    var circle: UnsafeMutablePointer<Circle>!
+    var selected: UnsafeMutablePointer<Circle>!
+
     
 // PARAMS PART //
     var lineColor: UIColor!
@@ -198,7 +199,6 @@ class CanvasView: UIView {
     var touchPoint: CGPoint!
     var crossSize: CGFloat!
     var minCircleSize: CGFloat!
-    var selected: UnsafeMutablePointer<Circle>!
     
     override func layoutSubviews() {
         self.clipsToBounds = true
@@ -263,7 +263,7 @@ class CanvasView: UIView {
                                           color: lineColor,
                                           colorSelect: lineColorSelect,
                                           strokeWidth: lineWidth))
-                circle = UnsafeMutablePointer<Circle>(&circleArray) + circleArray.count - 1
+                selected = UnsafeMutablePointer<Circle>(&circleArray) + circleArray.count - 1
             }
         }
     }
@@ -282,7 +282,7 @@ class CanvasView: UIView {
                 }
             } else if (editMode == false) {
                 let value = hypotnuse(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
-                circle.pointee.radius = value >= minCircleSize ? value : minCircleSize
+                selected.pointee.radius = value >= minCircleSize ? value : minCircleSize
             }
             self.setNeedsDisplay()
         }
@@ -294,13 +294,13 @@ class CanvasView: UIView {
             selected.pointee.resize = false
             selected = nil
             self.setNeedsDisplay()
-        } else if (circle != nil) {
-            circle = nil
+        } else if (selected != nil) {
+            selected = nil
         }
     }
     
     public func clearCanvas() {
-        circle = nil
+        selected = nil
         circleArray.removeAll()
         self.layer.sublayers = nil
         self.setNeedsDisplay()
