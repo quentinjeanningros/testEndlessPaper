@@ -25,7 +25,7 @@ class Circle {
     private let colorSelect: UIColor
     private let strokeWidth: CGFloat
 
-    init(center: CGPoint, radius: CGFloat, crossSize: CGFloat, color: UIColor, colorSelect: UIColor, strokeWidth: CGFloat) {
+    init(center: CGPoint, radius: CGFloat, crossSize: CGFloat, color: UIColor = UIColor.black, colorSelect: UIColor = UIColor.link, strokeWidth: CGFloat = 1) {
         self.center = center
         self.radius = radius
         self.crossSize = crossSize
