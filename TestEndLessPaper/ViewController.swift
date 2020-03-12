@@ -12,17 +12,12 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var canvasView: CanvasView!
     
-    @IBOutlet weak var EditSwitch: UISwitch!
-    
-    @IBAction func toggleEdit(_ sender: UISwitch) {
-        canvasView.toggleEditMode(mode: sender.isOn)
+    @IBAction func addCircle(_ sender: Any) {
+        canvasView.newCircle()
     }
     
     @IBAction func clearCanvas(_ sender: Any) {
         canvasView.clearCanvas()
-        EditSwitch.setOn(false, animated: true)
-        canvasView.toggleEditMode(mode: false)
-        
     }
     
 }

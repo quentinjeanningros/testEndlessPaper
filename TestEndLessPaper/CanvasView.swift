@@ -12,28 +12,28 @@ func distance(c1: CGFloat, c2: CGFloat) -> CGFloat {
         return (c1 * c1 + c2 * c2).squareRoot()
 }
 
-// same angle car angle aparallele
+func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, width: CGFloat, rounded: Bool, color: UIColor) {
+    ctx.setLineWidth(width)
+    ctx.move(to: p1)
+    ctx.addLine(to: p2)
+    ctx.setStrokeColor(color.cgColor)
+    ctx.setLineCap(rounded ? CGLineCap.round : CGLineCap.butt)
+}
 
 class Circle {
     //property
     public var center: CGPoint
     public var radius: CGFloat
-    
-    //display property
-    private let crossSize: CGFloat
-    private let strokeWidth: CGFloat
 
-    init(center: CGPoint, radius: CGFloat, crossSize: CGFloat, strokeWidth: CGFloat = 1) {
+    init(center: CGPoint, radius: CGFloat) {
         self.center = center
         self.radius = radius
-        self.crossSize = crossSize
-        self.strokeWidth = strokeWidth
     }
     
 // DRAW PART //
     
-    public func draw(ctx: CGContext, color: UIColor) {
-        ctx.setLineWidth(self.strokeWidth)
+    public func draw(ctx: CGContext, color: UIColor, strokeWidth: CGFloat) {
+        ctx.setLineWidth(strokeWidth)
         ctx.setStrokeColor(color.cgColor)
         ctx.addEllipse(in: CGRect(x: self.center.x - self.radius,
                                   y: self.center.y - self.radius,
@@ -42,27 +42,7 @@ class Circle {
         ctx.strokePath()
     }
     
-    public func drawCross(ctx: CGContext, color: UIColor) {
-        drawLine(p1: CGPoint(x: self.center.x - self.crossSize,
-                            y: self.center.y),
-                p2: CGPoint(x: self.center.x + self.crossSize,
-                            y: self.center.y),
-                ctx: ctx,
-                width: self.strokeWidth - 2.5 > 1 ? self.strokeWidth - 2.5 : 1,
-                rounded: true,
-                color: color)
-        drawLine(p1: CGPoint(x: self.center.x,
-                             y: self.center.y - self.crossSize),
-                p2: CGPoint(x: self.center.x,
-                            y: self.center.y + self.crossSize),
-                ctx: ctx,
-                width: self.strokeWidth - 2.5 > 1 ? self.strokeWidth - 2.5 : 1,
-                rounded: true,
-                color: color)
-        ctx.strokePath()
-    }
-    
-    public func drawTangent(ctx: CGContext, circle: Circle?, color: UIColor) {
+    public func drawTangent(ctx: CGContext, circle: Circle?, color: UIColor, strokeWidth: CGFloat) {
         if (circle == nil) {
             return
         }
@@ -70,34 +50,21 @@ class Circle {
                              c2: self.center.y - circle!.center.y)
         if (size + circle!.radius > self.radius &&
             size + self.radius > circle!.radius) {
-            let tangent = computeTangents(x1: self.center.x,
-                                          y1: self.center.y,
-                                          r1: self.radius,
-                                          x2: circle!.center.x,
-                                          y2: circle!.center.y,
-                                          r2: circle!.radius)
+            let tangent = computeTangents(circle: circle!)
             drawLine(p1: tangent[0],
                      p2: tangent[1],
                      ctx: ctx,
-                     width: self.strokeWidth - 1.5 > 1.5 ? self.strokeWidth - 1.5 : 1.5,
+                     width: strokeWidth,
                      rounded: false,
                      color: color)
             drawLine(p1: tangent[2],
                      p2: tangent[3],
                      ctx: ctx,
-                    width: self.strokeWidth - 1.5 > 1.5 ? self.strokeWidth - 1.5 : 1.5,
-                    rounded: false,
-                    color: color)
+                     width: strokeWidth,
+                     rounded: false,
+                     color: color)
             ctx.strokePath()
         }
-    }
-    
-    private func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, width: CGFloat, rounded: Bool, color: UIColor) {
-        ctx.setLineWidth(width)
-        ctx.move(to: p1)
-        ctx.addLine(to: p2)
-        ctx.setStrokeColor(color.cgColor)
-        ctx.setLineCap(rounded ? CGLineCap.round : CGLineCap.butt)
     }
     
 // CALCUL PART //
@@ -148,9 +115,9 @@ class Circle {
 //        return (s == 1 ? ([CGPoint(x: xt1, y: yt1), CGPoint(x: xt2, y: yt2)]) : ([CGPoint(x: xt1, y: yt2), CGPoint(x: xt2, y: yt1)]))
 //    }
     
-    private func computeTangents(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat) -> Array<CGPoint> {
+    private func computeTangents(circle: Circle) -> Array<CGPoint> {
         // formula https://en.wikipedia.org/wiki/Tangent_lines_to_circles
-        let (bX, bY, bR, sX, sY, sR) = r1 >= r2 ? (x1, y1, r1, x2, y2, r2) : (x2, y2, r2, x1, y1, r1)
+        let (bX, bY, bR, sX, sY, sR) = self.radius >= circle.radius ? (self.center.x, self.center.y, self.radius, circle.center.x, circle.center.y, circle.radius) : (circle.center.x, circle.center.y, circle.radius, self.center.x, self.center.y, self.radius)
         let (diffX, diffY, diffR) = ((bX - sX), (bY - sY), ( bR - sR))
 
         // objectif 1: get apha = radii and beta
@@ -194,17 +161,15 @@ class Circle {
 class CanvasView: UIView {
     
 // UTILS PART //
-    var editMode : Bool = false;
     var circleArray: Array<Circle> = Array()
-    var selected: (id: Int, circle: Circle?) = (-1, nil)
-    var resized: (id: Int, circle: Circle?) = (-1, nil)
+    var selected: Circle?
+    var touchPoint: CGPoint!
+    var diffCenterTouch: (x : CGFloat, y: CGFloat)!
     
 // PARAMS PART //
     var lineColor: UIColor!
     var lineColorSelect: UIColor!
     var lineWidth: CGFloat!
-    var touchPoint: CGPoint!
-    var crossSize: CGFloat!
     var minCircleSize: CGFloat!
     var minSizeTouch: CGFloat!
     
@@ -215,7 +180,6 @@ class CanvasView: UIView {
         lineColor = UIColor.black
         lineColorSelect = UIColor.link
         lineWidth = 5
-        crossSize = 5
         minSizeTouch = 16
         minCircleSize = minSizeTouch + 10
     }
@@ -231,16 +195,13 @@ class CanvasView: UIView {
                 // draw tangent
                 for i in 0...(circleArray.count - 1) {
                     if (i - 1 >= 0) {
-                        circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black)
+                        circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black, strokeWidth: lineWidth - 1.5)
                     }
                 }
             
                 // draw circle
-                for i in 0...(circleArray.count - 1) {
-                    circleArray[i].draw(ctx: ctx, color: i == resized.id ? lineColorSelect : lineColor)
-                    if (editMode) {
-                        circleArray[i].drawCross(ctx: ctx, color: i == selected.id ? lineColorSelect : lineColor)
-                    }
+                for it in circleArray {
+                    it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
                 }
             }
         }
@@ -252,24 +213,12 @@ class CanvasView: UIView {
         let touch = touches.first
         if (touch != nil) {
             touchPoint = touch?.location(in: self )
-            if (editMode) {
-                for i in 0...(circleArray.count > 0 ? circleArray.count - 1 : 0) {
-                    let size = distance(c1: touchPoint.x - circleArray[i].center.x, c2: touchPoint.y - circleArray[i].center.y)
-                    if (size <= crossSize + minSizeTouch) {
-                        selected = (id: i, circle: circleArray[i])
-                        break
-                    }
-                    if (size <= circleArray[i].radius + minSizeTouch / 2 && size >= circleArray[i].radius - minSizeTouch / 2) {
-                        resized = (id: i, circle: circleArray[i])
-                        break
-                    }
+            for it in circleArray {
+                if (distance(c1: touchPoint.x - it.center.x, c2: touchPoint.y - it.center.y) <= it.radius + minSizeTouch / 2 + minSizeTouch) {
+                    selected = it
+                    diffCenterTouch = (x: it.center.x - touchPoint.x, y: it.center.y - touchPoint.y)
+                    break
                 }
-            } else {
-                resized = (id: circleArray.count, circle: Circle(center: touchPoint,
-                                                                     radius: minCircleSize,
-                                                                     crossSize: crossSize,
-                                                                     strokeWidth: lineWidth))
-                circleArray.append(resized.circle!)
             }
         }
     }
@@ -278,31 +227,16 @@ class CanvasView: UIView {
         let touch = touches.first
         if (touch != nil) {
             let point = touch!.location(in: self)
-            if (editMode && (selected.id != -1 || resized.id != -1)) {
-                if (selected.id != -1) {
-                    selected.circle!.center = point
-                }
-                if (resized.id != -1) {
-                    let value = distance(c1: point.x - resized.circle!.center.x, c2: point.y - resized.circle!.center.y)
-                    resized.circle!.radius = value >= minCircleSize ? value : minCircleSize
-                }
-                self.setNeedsDisplay()
-            }
-            else if (editMode == false && resized.id != -1) {
-                let value = distance(c1: point.x - touchPoint.x, c2: point.y - touchPoint.y)
-                resized.circle!.radius = value >= minCircleSize ? value : minCircleSize
+            if (selected != nil) {
+                selected!.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
                 self.setNeedsDisplay()
             }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (editMode && selected.id != -1) {
-            selected = (id: -1, circle: nil)
-            resized = (id: -1, circle: nil)
-            self.setNeedsDisplay()
-        } else if (resized.id != -1) {
-            resized = (id: -1, circle: nil)
+        if (selected != nil) {
+            selected = nil
             self.setNeedsDisplay()
         }
     }
@@ -313,9 +247,8 @@ class CanvasView: UIView {
         self.setNeedsDisplay()
     }
     
-    public func toggleEditMode(mode : Bool) {
-        editMode = mode
+    public func newCircle() {
+        circleArray.append(Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize))
         self.setNeedsDisplay()
     }
-    
 }

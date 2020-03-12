@@ -28,37 +28,28 @@
                                     <action selector="clearCanvas:" destination="BYZ-38-t0r" eventType="touchUpInside" id="I4X-aW-ION"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" alpha="0.5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Edit" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R9L-dx-3Ii">
-                                <rect key="frame" x="300" y="836" width="30" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <switch opaque="NO" alpha="0.5" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" restorationIdentifier="EditModeSwitch" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4UT-av-5Bq">
-                                <rect key="frame" x="340" y="831" width="51" height="31"/>
-                                <color key="onTintColor" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pUd-a9-LXw">
+                                <rect key="frame" x="307" y="832" width="72" height="30"/>
+                                <state key="normal" title="New circle"/>
                                 <connections>
-                                    <action selector="toggleEdit:" destination="BYZ-38-t0r" eventType="valueChanged" id="HNX-1w-lrV"/>
+                                    <action selector="addCircle:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qJ5-Ss-f81"/>
                                 </connections>
-                            </switch>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fEg-7a-UUJ" secondAttribute="bottom" id="7cv-UI-f6c"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Iaf-wY-bD1"/>
                             <constraint firstAttribute="bottom" secondItem="oQf-Tp-74N" secondAttribute="bottom" constant="20" symbolic="YES" id="JHN-B2-5c5"/>
-                            <constraint firstItem="4UT-av-5Bq" firstAttribute="leading" secondItem="R9L-dx-3Ii" secondAttribute="trailing" constant="10" id="TuV-3J-eSI"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="pUd-a9-LXw" secondAttribute="trailing" constant="35" id="WF5-x7-ACH"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="pUd-a9-LXw" secondAttribute="bottom" id="axP-2x-j5c"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" symbolic="YES" id="dIE-JK-cGy"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="4UT-av-5Bq" secondAttribute="bottom" id="fSR-fg-Mdw"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="4UT-av-5Bq" secondAttribute="trailing" constant="25" id="qpW-dt-Zdu"/>
                             <constraint firstItem="fEg-7a-UUJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="u6O-nD-ces"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="R9L-dx-3Ii" secondAttribute="bottom" constant="5" id="vQG-wM-7H5"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="wc2-d9-qAk"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
-                        <outlet property="EditSwitch" destination="4UT-av-5Bq" id="iQi-E7-Y38"/>
                         <outlet property="canvasView" destination="oQf-Tp-74N" id="Qqh-Q2-fca"/>
                     </connections>
                 </viewController>
