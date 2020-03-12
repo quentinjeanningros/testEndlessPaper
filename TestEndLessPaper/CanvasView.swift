@@ -18,6 +18,7 @@ func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, width: CGFloat, rounded:
     ctx.addLine(to: p2)
     ctx.setStrokeColor(color.cgColor)
     ctx.setLineCap(rounded ? CGLineCap.round : CGLineCap.butt)
+    
 }
 
 class Circle {
