@@ -70,6 +70,48 @@ class Circle {
     
 // CALCUL PART //
     
+    private func computeTangents(circle: Circle) -> Array<CGPoint> {
+        // formula https://en.wikipedia.org/wiki/Tangent_lines_to_circles
+        let (bX, bY, bR, sX, sY, sR) = self.radius >= circle.radius ? (self.center.x, self.center.y, self.radius, circle.center.x, circle.center.y, circle.radius) : (circle.center.x, circle.center.y, circle.radius, self.center.x, self.center.y, self.radius)
+        let (diffX, diffY, diffR) = ((bX - sX), (bY - sY), ( bR - sR))
+
+        // objectif 1: get apha = radii and beta
+        //          1-1: beta
+        let beta = asin(diffR / distance(c1: diffX, c2: diffY))
+        //          1-2: radii
+        let radii = (atan(diffY / diffX))
+        
+        let angle = (bX - sX) > 0 ? [(CGFloat.pi / 2), (3 * CGFloat.pi / 2)] : [(3 * CGFloat.pi / 2), (CGFloat.pi / 2)]
+        
+        //          1-3: alpha
+        let alpha = (-1 * radii) - beta
+        let variableX = cos(angle[0] - alpha)
+        let variableY = sin(angle[0] - alpha)
+        
+        let alphaBis = radii - beta
+        let variableXBis = cos(angle[1] + alphaBis)
+        let variableYBis = sin(angle[1] + alphaBis)
+        
+        // objectif 2: x and y of the tangent from circle1
+        let xT1 = sX + sR * variableX
+        let yT1 = sY + sR * variableY
+        
+        // objectif 3: x and y of the tangent from circle2
+        let xT2 = bX + bR * variableX
+        let yT2 = bY + bR * variableY
+        
+        // objectif 2: x and y of the other tangent from circle1
+        let xT3 = sX + sR * variableXBis
+        let yT3 = sY + sR * variableYBis
+        
+        // objectif 3: x and y of the other tangent from circle2
+        let xT4 = bX + bR * variableXBis
+        let yT4 = bY + bR * variableYBis
+        
+        
+        return ([CGPoint(x: xT1, y: yT1), CGPoint(x: xT2, y: yT2), CGPoint(x: xT3, y: yT3), CGPoint(x: xT4, y: yT4)])
+    }
+    
 //    private func computeTangents(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat)-> Array<CGPoint>  {
 //        if (r1 == r2) {
 //            return (computetangentEqual(x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2))
@@ -115,48 +157,6 @@ class Circle {
 //
 //        return (s == 1 ? ([CGPoint(x: xt1, y: yt1), CGPoint(x: xt2, y: yt2)]) : ([CGPoint(x: xt1, y: yt2), CGPoint(x: xt2, y: yt1)]))
 //    }
-    
-    private func computeTangents(circle: Circle) -> Array<CGPoint> {
-        // formula https://en.wikipedia.org/wiki/Tangent_lines_to_circles
-        let (bX, bY, bR, sX, sY, sR) = self.radius >= circle.radius ? (self.center.x, self.center.y, self.radius, circle.center.x, circle.center.y, circle.radius) : (circle.center.x, circle.center.y, circle.radius, self.center.x, self.center.y, self.radius)
-        let (diffX, diffY, diffR) = ((bX - sX), (bY - sY), ( bR - sR))
-
-        // objectif 1: get apha = radii and beta
-        //          1-1: beta
-        let beta = asin(diffR / distance(c1: diffX, c2: diffY))
-        //          1-2: radii
-        let radii = (atan(diffY / diffX))
-        
-        let angle = (bX - sX) > 0 ? [(CGFloat.pi / 2), (3 * CGFloat.pi / 2)] : [(3 * CGFloat.pi / 2), (CGFloat.pi / 2)]
-        
-        //          1-3: alpha
-        let alpha = (-1 * radii) - beta
-        let variableX = cos(angle[0] - alpha)
-        let variableY = sin(angle[0] - alpha)
-        
-        let alphaBis = radii - beta
-        let variableXBis = cos(angle[1] + alphaBis)
-        let variableYBis = sin(angle[1] + alphaBis)
-        
-        // objectif 2: x and y of the tangent from circle1
-        let xT1 = sX + sR * variableX
-        let yT1 = sY + sR * variableY
-        
-        // objectif 3: x and y of the tangent from circle2
-        let xT2 = bX + bR * variableX
-        let yT2 = bY + bR * variableY
-        
-        // objectif 2: x and y of the other tangent from circle1
-        let xT3 = sX + sR * variableXBis
-        let yT3 = sY + sR * variableYBis
-        
-        // objectif 3: x and y of the other tangent from circle2
-        let xT4 = bX + bR * variableXBis
-        let yT4 = bY + bR * variableYBis
-        
-        
-        return ([CGPoint(x: xT1, y: yT1), CGPoint(x: xT2, y: yT2), CGPoint(x: xT3, y: yT3), CGPoint(x: xT4, y: yT4)])
-    }
 }
 
 class CanvasView: UIView {
@@ -231,6 +231,10 @@ class CanvasView: UIView {
             if (selected != nil) {
                 selected!.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
                 self.setNeedsDisplay()
+//                let value =  selected!.radius + (-1 * (touchPoint.x - point.x) / 2)
+//                selected?.radius = value < 2 ? 2 : value
+//                touchPoint = point
+//                self.setNeedsDisplay()
             }
         }
     }
@@ -249,7 +253,8 @@ class CanvasView: UIView {
     }
     
     public func newCircle() {
-        circleArray.append(Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize))
+        selected = Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize)
+        circleArray.append(selected!)
         self.setNeedsDisplay()
     }
 }
