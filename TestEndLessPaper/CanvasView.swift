@@ -162,21 +162,25 @@ class Circle {
 class CanvasView: UIView {
     
 // UTILS PART //
+
     var circleArray: Array<Circle> = Array()
     var selected: Circle?
-    var touchPoint: CGPoint!
     var diffCenterTouch: (x : CGFloat, y: CGFloat)!
+    var growMarkX: CGFloat?
     
 // PARAMS PART //
+
     var lineColor: UIColor!
     var lineColorSelect: UIColor!
     var lineWidth: CGFloat!
     var minCircleSize: CGFloat!
     var minSizeTouch: CGFloat!
     
+// INIT //
+    
     override func layoutSubviews() {
         self.clipsToBounds = true
-        self.isMultipleTouchEnabled = false
+        self.isMultipleTouchEnabled = true
         
         lineColor = UIColor.black
         lineColorSelect = UIColor.link
@@ -211,30 +215,43 @@ class CanvasView: UIView {
 // ACTION PART //
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        if (touch != nil) {
-            touchPoint = touch?.location(in: self )
-            for it in circleArray {
-                if (distance(c1: touchPoint.x - it.center.x, c2: touchPoint.y - it.center.y) <= it.radius + minSizeTouch / 2 + minSizeTouch) {
-                    selected = it
-                    diffCenterTouch = (x: it.center.x - touchPoint.x, y: it.center.y - touchPoint.y)
-                    break
+        for (index, touch) in touches.enumerated() {
+            let point = touch.location(in: self)
+            print(index)
+            if (index == 0) {
+                for it in circleArray {
+                    if (distance(c1: point.x - it.center.x, c2: point.y - it.center.y) <= it.radius + minSizeTouch / 2 + minSizeTouch) {
+                        selected = it
+                        diffCenterTouch = (x: it.center.x - point.x, y: it.center.y - point.y)
+                        break
+                    }
                 }
+            } else if (index == 1) {
+                growMarkX = point.x
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        if (touch != nil) {
-            let point = touch!.location(in: self)
+        for (index, touch) in touches.enumerated() {
             if (selected != nil) {
-                selected!.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
-                self.setNeedsDisplay()
-//                let value =  selected!.radius + (-1 * (touchPoint.x - point.x) / 2)
-//                selected?.radius = value < 2 ? 2 : value
-//                touchPoint = point
-//                self.setNeedsDisplay()
+                let point = touch.location(in: self)
+                if (touches.count >= 1 && index == 0 && distance(c1: point.x - selected!.center.x, c2: point.y - selected!.center.y) > selected!.radius + minSizeTouch / 2 + minSizeTouch) {
+                    selected = nil
+                    self.setNeedsDisplay()
+                    continue
+                } else if (touches.count == 1) {
+                    selected!.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
+                    self.setNeedsDisplay()
+                    continue
+                }
+                if (index == 1 && growMarkX != nil){
+                    let value =  selected!.radius + (-1 * (growMarkX! - point.x) / 2)
+                    selected!.radius = value < 2 ? 2 : value
+                    growMarkX = point.x
+                    self.setNeedsDisplay()
+                    continue
+                }
             }
         }
     }
@@ -248,13 +265,11 @@ class CanvasView: UIView {
     
     public func clearCanvas() {
         circleArray.removeAll()
-        self.layer.sublayers = nil
         self.setNeedsDisplay()
     }
     
     public func newCircle() {
-        selected = Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize)
-        circleArray.append(selected!)
+        circleArray.append(Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize))
         self.setNeedsDisplay()
     }
 }
