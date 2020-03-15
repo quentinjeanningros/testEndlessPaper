@@ -31,6 +31,13 @@ class Circle {
         self.radius = radius
     }
     
+    public func IsIn(point: CGPoint, marge: CGFloat) -> Bool {
+        if (distance(c1: point.x - self.center.x, c2: point.y - self.center.y) <= self.radius + marge / 2 + marge){
+            return true
+        }
+        return false
+    }
+    
 // DRAW PART //
     
     public func draw(ctx: CGContext, color: UIColor, strokeWidth: CGFloat) {
@@ -159,11 +166,19 @@ class Circle {
 //    }
 }
 
+typealias MethodHandler = (Circle, CGPoint)  -> Void
+
+struct LinkTouchMethod {
+    let touch: UITouch!
+    let method: MethodHandler
+}
+
 class CanvasView: UIView {
     
 // UTILS PART //
 
     var circleArray: Array<Circle> = Array()
+    var touchArray: Array<LinkTouchMethod> = Array()
     var selected: Circle?
     var diffCenterTouch: (x : CGFloat, y: CGFloat)!
     var growMarkX: CGFloat?
@@ -215,52 +230,89 @@ class CanvasView: UIView {
 // ACTION PART //
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for (index, touch) in touches.enumerated() {
+        for touch in touches {
             let point = touch.location(in: self)
-            print(index)
-            if (index == 0) {
-                for it in circleArray {
-                    if (distance(c1: point.x - it.center.x, c2: point.y - it.center.y) <= it.radius + minSizeTouch / 2 + minSizeTouch) {
-                        selected = it
-                        diffCenterTouch = (x: it.center.x - point.x, y: it.center.y - point.y)
-                        break
-                    }
+            for it in circleArray {
+                if (it.IsIn(point: point, marge: minSizeTouch)) {
+                    touchArray.append(LinkTouchMethod(touch: touch, method: moveCircle))
+                    selected = it
+                    diffCenterTouch = (x: it.center.x - point.x, y: it.center.y - point.y)
+                    break
                 }
-            } else if (index == 1) {
+            }
+            if (selected != nil && touches.count > 1) {
+                print("1")
+                touchArray.append(LinkTouchMethod(touch: touch, method: recizeCircle))
                 growMarkX = point.x
+                break
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for (index, touch) in touches.enumerated() {
+        for touch in touches {
             if (selected != nil) {
                 let point = touch.location(in: self)
-                if (touches.count >= 1 && index == 0 && distance(c1: point.x - selected!.center.x, c2: point.y - selected!.center.y) > selected!.radius + minSizeTouch / 2 + minSizeTouch) {
-                    selected = nil
-                    self.setNeedsDisplay()
-                    continue
-                } else if (touches.count == 1) {
-                    selected!.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
-                    self.setNeedsDisplay()
-                    continue
+                for (index, it) in touchArray.enumerated() {
+                    if (touch == it.touch) {
+                        if (touches.count > 1 && index == 0 && selected!.IsIn(point: point, marge: minSizeTouch) == false) {
+                            selected = nil
+                            self.setNeedsDisplay()
+                            break
+                        }
+                        if (touches.count > 1) {
+                            if (index != 0) {
+                                it.method(selected!, point)
+                            }
+                        } else {
+                            it.method(selected!, point)
+                        }
+                    } else if (touches.count > 1) {
+//                        touchArray.append(LinkTouchMethod(touch: touch, method: recizeCircle))
+//                        growMarkX = point.x
+//                        break
+                    }
                 }
-                if (index == 1 && growMarkX != nil){
-                    let value =  selected!.radius + (-1 * (growMarkX! - point.x) / 2)
-                    selected!.radius = value < 2 ? 2 : value
-                    growMarkX = point.x
-                    self.setNeedsDisplay()
-                    continue
-                }
+            } else {
+                break
             }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        var removable: Array<Int> = Array()
+        for touch in touches {
+            for (index, it) in touchArray.enumerated() {
+                if (touch == it.touch) {
+                    removable.append(index)
+                }
+            }
+        }
+        var i = removable.count - 1
+        while (i >= 0) {
+            touchArray.remove(at: removable[i])
+            i -= 1
+        }
         if (selected != nil) {
             selected = nil
             self.setNeedsDisplay()
         }
+    }
+    
+    private func moveCircle(circle: Circle, point: CGPoint) {
+        circle.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
+        self.setNeedsDisplay()
+    }
+    
+    private func recizeCircle(circle: Circle, point: CGPoint) {
+        if (growMarkX == nil) {
+            growMarkX = point.x
+            return
+        }
+        let value =  selected!.radius + ((growMarkX! - point.x) / 2)
+        circle.radius = value < minSizeTouch ? minSizeTouch : value
+        growMarkX = point.x
+        self.setNeedsDisplay()
     }
     
     public func clearCanvas() {
