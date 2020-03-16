@@ -21,6 +21,10 @@ func drawLine(p1: CGPoint, p2: CGPoint, ctx: CGContext, width: CGFloat, rounded:
     
 }
 
+// douvle tap crée
+// deplacement cercle selectionne
+// molette resize cercle selectionné
+
 class Circle {
     //property
     public var center: CGPoint
@@ -118,70 +122,19 @@ class Circle {
         
         return ([CGPoint(x: xT1, y: yT1), CGPoint(x: xT2, y: yT2), CGPoint(x: xT3, y: yT3), CGPoint(x: xT4, y: yT4)])
     }
-    
-//    private func computeTangents(x1: CGFloat, y1: CGFloat, r1: CGFloat, x2: CGFloat, y2: CGFloat, r2: CGFloat)-> Array<CGPoint>  {
-//        if (r1 == r2) {
-//            return (computetangentEqual(x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2))
-//        }
-//
-//        let (sX, sY, sR, bX, bY, bR) = r2 > r1 ? (x1, y1, r1, x2, y2, r2) : (x2, y2, r2, x1, y1, r1)
-//
-//        // objectif 1: get intersection point of the outer tangents
-//        let xP = (sX * bR - bX * sR) / (bR - sR)
-//        let yP = (sY * bR - bY * sR) / (bR - sR)
-//
-//        // objectif 2: get Bigger Cirle Points
-//        let bCP = calctangentPoint(xP: xP, yP: yP, x: bX, y: bY, r: bR)
-//
-//        // objectif 3: get Smaller Cirle Points
-//        let sCP = calctangentPoint(xP: xP, yP: yP, x: sX, y: sY, r: sR)
-//
-//        return ([bCP[0], sCP[0], bCP[1], sCP[1]])
-//    }
-//
-//    private func calctangentPoint(xP: CGFloat, yP: CGFloat, x: CGFloat, y: CGFloat, r: CGFloat) -> Array<CGPoint> {
-//        // formula http://www.ambrsoft.com/TrigoCalc/Circles2/Circles2Tangent_.htm
-//
-//        // objectif 1: distance between the intersection point of tangents and the center of the circle
-//        let dirX = xP - x
-//        let dirY = yP - y
-//
-//        let rSquare = r * r
-//        let dirSquare = (dirX * dirX) + (dirY * dirY)
-//
-//        // objectif 2: distance between the intersection point of tangents and circle tangent point (pythagore)
-//        let root = (dirSquare - rSquare).squareRoot()
-//
-//        // objectif 3: get the 2 intersections points between tangents and the circle
-//        let xt1 = (((rSquare * dirX) + (r * dirY * root)) / (dirSquare)) + x
-//        let yt1 = (((rSquare * dirY) + (r * dirX * root)) / (dirSquare)) + y
-//
-//        let xt2 = (((rSquare * dirX) - (r * dirY * root)) / (dirSquare)) + x
-//        let yt2 = (((rSquare * dirY) - (r * dirX * root)) / (dirSquare)) + y
-//
-//        // objectif 4: check which pair create tangents
-//        let s = ((y - yt1) * (yP - yt1)) / ((xt1 - x) * (xt1 - xP))
-//
-//        return (s == 1 ? ([CGPoint(x: xt1, y: yt1), CGPoint(x: xt2, y: yt2)]) : ([CGPoint(x: xt1, y: yt2), CGPoint(x: xt2, y: yt1)]))
-//    }
 }
 
-typealias MethodHandler = (Circle, CGPoint)  -> Void
 
-struct LinkTouchMethod {
-    let touch: UITouch!
-    let method: MethodHandler
-}
+// VIEW //
 
 class CanvasView: UIView {
     
 // UTILS PART //
 
     var circleArray: Array<Circle> = Array()
-    var touchArray: Array<LinkTouchMethod> = Array()
     var selected: Circle?
     var diffCenterTouch: (x : CGFloat, y: CGFloat)!
-    var growMarkX: CGFloat?
+    var lastTouch: CGPoint!
     
 // PARAMS PART //
 
@@ -195,7 +148,10 @@ class CanvasView: UIView {
     
     override func layoutSubviews() {
         self.clipsToBounds = true
-        self.isMultipleTouchEnabled = true
+        self.isMultipleTouchEnabled = false
+        let tap = UITapGestureRecognizer(target: self, action: #selector(doubleTapped))
+        tap.numberOfTapsRequired = 2
+        self.addGestureRecognizer(tap)
         
         lineColor = UIColor.black
         lineColorSelect = UIColor.link
@@ -227,77 +183,43 @@ class CanvasView: UIView {
         }
     }
     
-// ACTION PART //
+// TOUCH PART //
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let point = touch.location(in: self)
-            for it in circleArray {
-                if (it.IsIn(point: point, marge: minSizeTouch)) {
-                    touchArray.append(LinkTouchMethod(touch: touch, method: moveCircle))
-                    selected = it
-                    diffCenterTouch = (x: it.center.x - point.x, y: it.center.y - point.y)
-                    break
+        let touch = touches.first
+        if (touch != nil) {
+            lastTouch = touch!.location(in: self)
+            if (selected == nil) {
+                for it in circleArray {
+                    if (it.IsIn(point: lastTouch, marge: minSizeTouch)) {
+                        selected = it
+                        diffCenterTouch = (x: it.center.x - lastTouch.x, y: it.center.y - lastTouch.y)
+                        break
+                    }
                 }
-            }
-            if (selected != nil && touches.count > 1) {
-                print("1")
-                touchArray.append(LinkTouchMethod(touch: touch, method: recizeCircle))
-                growMarkX = point.x
-                break
+            } else if (selected!.IsIn(point: lastTouch, marge: minSizeTouch) == false) {
+                selected = nil
+                self.setNeedsDisplay()
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            if (selected != nil) {
-                let point = touch.location(in: self)
-                for (index, it) in touchArray.enumerated() {
-                    if (touch == it.touch) {
-                        if (touches.count > 1 && index == 0 && selected!.IsIn(point: point, marge: minSizeTouch) == false) {
-                            selected = nil
-                            self.setNeedsDisplay()
-                            break
-                        }
-                        if (touches.count > 1) {
-                            if (index != 0) {
-                                it.method(selected!, point)
-                            }
-                        } else {
-                            it.method(selected!, point)
-                        }
-                    } else if (touches.count > 1) {
-//                        touchArray.append(LinkTouchMethod(touch: touch, method: recizeCircle))
-//                        growMarkX = point.x
-//                        break
-                    }
-                }
-            } else {
-                break
-            }
+        let touch = touches.first
+        if (touch != nil && selected != nil) {
+            let point = touch!.location(in: self)
+            moveCircle(circle: selected!, point: point)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var removable: Array<Int> = Array()
-        for touch in touches {
-            for (index, it) in touchArray.enumerated() {
-                if (touch == it.touch) {
-                    removable.append(index)
-                }
-            }
-        }
-        var i = removable.count - 1
-        while (i >= 0) {
-            touchArray.remove(at: removable[i])
-            i -= 1
-        }
-        if (selected != nil) {
-            selected = nil
-            self.setNeedsDisplay()
-        }
     }
+    
+    @objc func doubleTapped() {
+        newCircle(position: lastTouch)
+    }
+    
+// ACTION PART //
     
     private func moveCircle(circle: Circle, point: CGPoint) {
         circle.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
@@ -305,23 +227,18 @@ class CanvasView: UIView {
     }
     
     private func recizeCircle(circle: Circle, point: CGPoint) {
-        if (growMarkX == nil) {
-            growMarkX = point.x
-            return
-        }
-        let value =  selected!.radius + ((growMarkX! - point.x) / 2)
-        circle.radius = value < minSizeTouch ? minSizeTouch : value
-        growMarkX = point.x
         self.setNeedsDisplay()
     }
     
     public func clearCanvas() {
+        selected = nil
         circleArray.removeAll()
         self.setNeedsDisplay()
     }
     
-    public func newCircle() {
-        circleArray.append(Circle(center: CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2), radius: minCircleSize))
+    public func newCircle(position: CGPoint) {
+        selected = Circle(center: position, radius: minCircleSize)
+        circleArray.append(selected!)
         self.setNeedsDisplay()
     }
 }

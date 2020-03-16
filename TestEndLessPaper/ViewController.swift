@@ -12,10 +12,6 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var canvasView: CanvasView!
     
-    @IBAction func addCircle(_ sender: Any) {
-        canvasView.newCircle()
-    }
-    
     @IBAction func clearCanvas(_ sender: Any) {
         canvasView.clearCanvas()
     }
