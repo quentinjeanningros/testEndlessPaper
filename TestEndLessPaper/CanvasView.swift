@@ -300,9 +300,10 @@ class CanvasView: UIView {
         if (touch != nil && selected != nil) {
             let point = touch!.location(in: self)
             if (wheelSelected && wheel.IsIn(point: lastTouch, marge: minSizeTouch)) {
-                let value = lastTouch.x - point.x
-                selected?.radius = value > minCircleSize ? value : minCircleSize
-            } else {
+                let value = lastTouch.x - point.x + selected!.radius
+                selected!.radius = value > minCircleSize ? value : minCircleSize
+                lastTouch = point
+            } else if (wheelSelected) {
                 moveCircle(circle: selected!, point: point)
             }
             self.setNeedsDisplay()
