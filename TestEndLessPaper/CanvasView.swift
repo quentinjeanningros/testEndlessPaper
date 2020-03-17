@@ -135,6 +135,7 @@ class gearWheel {
     private let height: CGFloat!
     private let position: CGPoint!
     private let incrementDisplay: CGFloat!
+    private let size: CGFloat!
 
     init(value: CGFloat, increment: CGFloat, min: CGFloat, speed: CGFloat, width: CGFloat, height: CGFloat, position: CGPoint) {
         self.value = value
@@ -145,6 +146,7 @@ class gearWheel {
         self.height = height
         self.position = position
         self.incrementDisplay = self.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
+        self.size = self.position.y + (self.height * 60 / 100)
     }
     
     public func IsIn(point: CGPoint, marge: CGFloat) -> Bool {
@@ -161,7 +163,6 @@ class gearWheel {
     }
     
     public func draw(ctx: CGContext) {
-        let size = self.position.y + (self.height * 50 / 100)
         let mid = self.position.x + (self.width / 2)
         let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
         let start = (value - trunck - self.min) / self.increment
@@ -179,13 +180,13 @@ class gearWheel {
         repeat {
             x = (incr * self.incrementDisplay) + xStart
             if (((incr * self.increment) + trunckStep).truncatingRemainder(dividingBy: step) == 0) {
-                drawLine(p1: CGPoint(x: x, y: size),
+                drawLine(p1: CGPoint(x: x, y: self.size),
                          p2: CGPoint(x: x, y: self.position.y + self.height),
                          ctx: ctx, width: 1,
                          rounded: false,
                          color: UIColor.black)
             } else {
-                drawLine(p1: CGPoint(x: x, y: size),
+                drawLine(p1: CGPoint(x: x, y: self.size),
                          p2: CGPoint(x: x, y: self.position.y + self.height),
                          ctx: ctx, width: 1,
                          rounded: false,
@@ -248,7 +249,7 @@ class CanvasView: UIView {
                                min: minCircleSize,
                                speed: 4,
                                width: self.bounds.width,
-                               height: 25,
+                               height: 30,
                                position: CGPoint(x: 0, y: 90 * self.bounds.height / 100 ))
     }
     
