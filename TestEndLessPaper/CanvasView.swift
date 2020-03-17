@@ -149,7 +149,7 @@ class gearWheel {
         let size = self.position.y + (self.height * 50 / 100)
         let mid = self.position.x + (self.width / 2)
         let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
-        let adjustement = -1 * CGFloat(self.increment - trunck) * self.incrementDisplay / CGFloat(self.increment)  + mid
+        let adjustement = -1 * CGFloat(trunck) * self.incrementDisplay / CGFloat(self.increment)  + mid
         let adjustementStep = CGFloat(self.value - (self.increment - trunck).truncatingRemainder(dividingBy: 1))
 
         var posX: CGFloat
