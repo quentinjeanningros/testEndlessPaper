@@ -181,7 +181,7 @@ class gearWheel {
             if (((incr * self.increment) + trunckStep).truncatingRemainder(dividingBy: step) == 0) {
                 drawLine(p1: CGPoint(x: x, y: size),
                          p2: CGPoint(x: x, y: self.position.y + self.height),
-                         ctx: ctx, width: 2,
+                         ctx: ctx, width: 1,
                          rounded: false,
                          color: UIColor.black)
             } else {
@@ -189,7 +189,7 @@ class gearWheel {
                          p2: CGPoint(x: x, y: self.position.y + self.height),
                          ctx: ctx, width: 1,
                          rounded: false,
-                         color: UIColor.black)
+                         color: UIColor.lightGray)
             }
             ctx.strokePath()
             incr += 1
@@ -347,7 +347,7 @@ class CanvasView: UIView {
     }
     
     public func newCircle(position: CGPoint) {
-        selected = Circle(center: position, radius: minCircleSize)
+        selected = Circle(center: position, radius: minCircleSize + 20)
         circleArray.append(selected!)
         self.setNeedsDisplay()
     }
