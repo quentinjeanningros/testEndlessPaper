@@ -14,6 +14,9 @@
 		47B973DC240D38E40091E176 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 47B973DB240D38E40091E176 /* Assets.xcassets */; };
 		47B973DF240D38E40091E176 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47B973DD240D38E40091E176 /* LaunchScreen.storyboard */; };
 		47B973E9240D39BD0091E176 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B973E8240D39BD0091E176 /* CanvasView.swift */; };
+		47E17FD424213120003FF508 /* GearWheel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E17FD324213120003FF508 /* GearWheel.swift */; };
+		47E17FD7242167A1003FF508 /* Circle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E17FD6242167A1003FF508 /* Circle.swift */; };
+		47E17FD9242167F9003FF508 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E17FD8242167F9003FF508 /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +29,9 @@
 		47B973DE240D38E40091E176 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		47B973E0240D38E40091E176 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		47B973E8240D39BD0091E176 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+		47E17FD324213120003FF508 /* GearWheel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GearWheel.swift; sourceTree = "<group>"; };
+		47E17FD6242167A1003FF508 /* Circle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Circle.swift; sourceTree = "<group>"; };
+		47E17FD8242167F9003FF508 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +72,9 @@
 				47B973DD240D38E40091E176 /* LaunchScreen.storyboard */,
 				47B973E0240D38E40091E176 /* Info.plist */,
 				47B973E8240D39BD0091E176 /* CanvasView.swift */,
+				47E17FD324213120003FF508 /* GearWheel.swift */,
+				47E17FD6242167A1003FF508 /* Circle.swift */,
+				47E17FD8242167F9003FF508 /* Utils.swift */,
 			);
 			path = TestEndLessPaper;
 			sourceTree = "<group>";
@@ -142,9 +151,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				47B973D7240D38E20091E176 /* ViewController.swift in Sources */,
+				47E17FD424213120003FF508 /* GearWheel.swift in Sources */,
 				47B973D3240D38E20091E176 /* AppDelegate.swift in Sources */,
+				47E17FD9242167F9003FF508 /* Utils.swift in Sources */,
 				47B973E9240D39BD0091E176 /* CanvasView.swift in Sources */,
 				47B973D5240D38E20091E176 /* SceneDelegate.swift in Sources */,
+				47E17FD7242167A1003FF508 /* Circle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

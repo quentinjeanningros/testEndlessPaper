@@ -17,7 +17,21 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oQf-Tp-74N" customClass="CanvasView" customModule="TestEndLessPaper" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="20" width="414" height="856"/>
+                                <subviews>
+                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="stc-es-Wma" customClass="GearWheel" customModule="TestEndLessPaper" customModuleProvider="target">
+                                        <rect key="frame" x="8" y="780" width="398" height="30"/>
+                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="displayP3"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="30" id="Qs6-7M-twR"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="stc-es-Wma" secondAttribute="trailing" constant="8" id="7l3-tT-0Lb"/>
+                                    <constraint firstAttribute="bottom" secondItem="stc-es-Wma" secondAttribute="bottom" constant="46" id="Iqp-YR-cfY"/>
+                                    <constraint firstItem="stc-es-Wma" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="ujP-wg-dOa"/>
+                                </constraints>
                             </view>
                             <button opaque="NO" alpha="0.5" contentMode="scaleToFill" restorationIdentifier="ClearButton" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fEg-7a-UUJ">
                                 <rect key="frame" x="50" y="832" width="36" height="30"/>
@@ -35,6 +49,7 @@
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Iaf-wY-bD1"/>
                             <constraint firstAttribute="bottom" secondItem="oQf-Tp-74N" secondAttribute="bottom" constant="20" symbolic="YES" id="JHN-B2-5c5"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" symbolic="YES" id="dIE-JK-cGy"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fEg-7a-UUJ" secondAttribute="trailing" constant="328" id="iA8-Ag-PrK"/>
                             <constraint firstItem="fEg-7a-UUJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="u6O-nD-ces"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="wc2-d9-qAk"/>
                         </constraints>
@@ -42,6 +57,7 @@
                     </view>
                     <connections>
                         <outlet property="canvasView" destination="oQf-Tp-74N" id="Qqh-Q2-fca"/>
+                        <outlet property="gearWheel" destination="stc-es-Wma" id="TYo-Am-lpR"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
