@@ -57,9 +57,9 @@ class CanvasView: UIView {
         self.setNeedsDisplay()
     }
     
-    public func setSelectedSize(size: CGFloat) {
-        if (selected != nil) {
-            selected!.radius = size
+    public func setCircleSize(circle: Circle!, size: CGFloat) {
+        if (circle != nil) {
+            circle.radius = size
             self.setNeedsDisplay()
         }
     }

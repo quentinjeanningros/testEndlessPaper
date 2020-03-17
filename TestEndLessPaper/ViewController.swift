@@ -12,6 +12,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var canvasView: CanvasView!
     @IBOutlet weak var gearWheel: GearWheel!
+    @IBOutlet weak var SizeLabel: UILabel!
     
     var minSizeTouch: CGFloat!
     var minCircleSize: CGFloat!
@@ -31,7 +32,7 @@ class ViewController: UIViewController {
         
         self.minSizeTouch = 16
         self.minCircleSize = self.minSizeTouch + 4
-        gearWheel.communInit(callback: canvasView.setSelectedSize ,increment: 5, min: self.minCircleSize, speed: 4)
+        gearWheel.communInit(callback: setSelectedCircleSize, increment: 5, min: self.minCircleSize, speed: 4)
     }
     
 // TOUCH PART //
@@ -46,7 +47,7 @@ class ViewController: UIViewController {
                                           y:  canvasView.selected.center.y - lastTouch.y)
                 displayWheel(circle: canvasView.selected)
             } else {
-                 gearWheel.isHidden = true
+                 hideWheel()
             }
         }
     }
@@ -65,8 +66,9 @@ class ViewController: UIViewController {
 // ACTION PART //
     
     @IBAction func clearCanvas(_ sender: Any) {
-        canvasView.selected = nil
+        canvasView.select(circle: nil)
         canvasView.clearCanvas()
+        hideWheel()
     }
     
     @objc func doubleTapped() {
@@ -78,7 +80,19 @@ class ViewController: UIViewController {
         if (circle != nil) {
             gearWheel.isHidden = false
             gearWheel.setValue(value: circle.radius)
+            SizeLabel.text = Double(round(10 * canvasView.selected.radius) / 10).description
+            SizeLabel.isHidden = false
         }
+    }
+    
+    private func hideWheel() {
+        gearWheel.isHidden = true
+        SizeLabel.isHidden = true
+    }
+    
+    private func setSelectedCircleSize(size: CGFloat) {
+        canvasView.setCircleSize(circle: canvasView.selected, size: size)
+        SizeLabel.text = Double(round(10 * canvasView.selected.radius) / 10).description
     }
     
 }
