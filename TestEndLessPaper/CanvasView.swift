@@ -303,7 +303,7 @@ class CanvasView: UIView {
                 let value = lastTouch.x - point.x + selected!.radius
                 selected!.radius = value > minCircleSize ? value : minCircleSize
                 lastTouch = point
-            } else if (wheelSelected) {
+            } else if (wheelSelected == false) {
                 moveCircle(circle: selected!, point: point)
             }
             self.setNeedsDisplay()
