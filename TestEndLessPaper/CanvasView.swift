@@ -323,8 +323,10 @@ class CanvasView: UIView {
 // ACTION PART //
     
     private func moveCircle(circle: Circle, point: CGPoint) {
-        circle.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
-        self.setNeedsDisplay()
+        if (diffCenterTouch != nil) {
+            circle.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
+            self.setNeedsDisplay()
+        }
     }
     
     private func recizeCircle(circle: Circle, point: CGPoint) {
