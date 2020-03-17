@@ -148,8 +148,8 @@ class gearWheel {
     }
     
     public func IsIn(point: CGPoint, marge: CGFloat) -> Bool {
-        if (point.x > self.position.x - marge / 2 && point.x < self.position.x + self.width + marge / 2 &&
-            point.y > self.position.y - marge  / 2 && point.y < self.position.y + self.height + marge / 2){
+        if (point.x > self.position.x - marge && point.x < self.position.x + self.width + marge &&
+            point.y > self.position.y - marge && point.y < self.position.y + self.height + marge){
             return true
         }
         return false
@@ -249,7 +249,7 @@ class CanvasView: UIView {
                                speed: 4,
                                width: self.bounds.width,
                                height: 25,
-                               position: CGPoint(x: 0, y: self.bounds.height - 100))
+                               position: CGPoint(x: 0, y: 90 * self.bounds.height / 100 ))
     }
     
 // DISPLAY PART //
