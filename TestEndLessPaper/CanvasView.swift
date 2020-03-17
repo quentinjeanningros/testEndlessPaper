@@ -130,15 +130,17 @@ class gearWheel {
     public var value: CGFloat!
     private let increment: CGFloat!
     private let min: CGFloat!
+    private let speed: CGFloat!
     private let width: CGFloat!
     private let height: CGFloat!
     private let position: CGPoint!
     private let incrementDisplay: CGFloat!
 
-    init(value: CGFloat, increment: CGFloat, min: CGFloat, width: CGFloat, height: CGFloat, position: CGPoint) {
+    init(value: CGFloat, increment: CGFloat, min: CGFloat, speed: CGFloat, width: CGFloat, height: CGFloat, position: CGPoint) {
         self.value = value
         self.increment = increment
         self.min = min
+        self.speed = speed
         self.width = width
         self.height = height
         self.position = position
@@ -151,6 +153,11 @@ class gearWheel {
             return true
         }
         return false
+    }
+    
+    public func scroll(distance: CGFloat) -> CGFloat {
+        let newValue = distance * speed / incrementDisplay + self.value
+        return (newValue > min ? newValue : min)
     }
     
     public func draw(ctx: CGContext) {
@@ -199,7 +206,6 @@ class gearWheel {
                  color: UIColor.link)
         ctx.strokePath()
     }
-    
 }
 
 // VIEW //
@@ -237,8 +243,10 @@ class CanvasView: UIView {
         lineWidth = 5
         minSizeTouch = 16
         minCircleSize = minSizeTouch + 4
-        self.wheel = gearWheel(value: 35, increment: 5,
+        self.wheel = gearWheel(value: 35,
+                               increment: 5,
                                min: minCircleSize,
+                               speed: 4,
                                width: self.bounds.width,
                                height: 25,
                                position: CGPoint(x: 0, y: self.bounds.height - 100))
@@ -300,8 +308,8 @@ class CanvasView: UIView {
         if (touch != nil && selected != nil) {
             let point = touch!.location(in: self)
             if (wheelSelected && wheel.IsIn(point: lastTouch, marge: minSizeTouch)) {
-                let value = lastTouch.x - point.x + selected!.radius
-                selected!.radius = value > minCircleSize ? value : minCircleSize
+                selected!.radius = self.wheel.scroll(distance: (lastTouch.x - point.x))
+                print(selected!.radius )
                 lastTouch = point
             } else if (wheelSelected == false) {
                 moveCircle(circle: selected!, point: point)
