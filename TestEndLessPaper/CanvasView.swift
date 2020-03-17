@@ -142,24 +142,23 @@ class gearWheel {
         self.width = width
         self.height = height
         self.position = position
-        self.incrementDisplay = self.width * 2.5 / 100 // consider  1 incrementDisplay = 1 increment
+        self.incrementDisplay = self.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
     }
     
     public func draw(ctx: CGContext) {
         let size = self.position.y + (self.height * 50 / 100)
         let mid = self.position.x + (self.width / 2)
-        let trunck =  -1 * (self.value.truncatingRemainder(dividingBy: self.increment) - self.increment)
-        let adjustement = CGFloat(trunck) * self.incrementDisplay / CGFloat(self.increment)
-        let adjustementStep = CGFloat(self.value - trunck.truncatingRemainder(dividingBy: 1))
+        let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
+        let adjustement = -1 * CGFloat(self.increment - trunck) * self.incrementDisplay / CGFloat(self.increment)  + mid
+        let adjustementStep = CGFloat(self.value - (self.increment - trunck).truncatingRemainder(dividingBy: 1))
 
-        var incr = CGFloat(0)
         var posX: CGFloat
         
-        // draw wheel
+        // draw wheel after middle
+        var incr = CGFloat(0)
         repeat {
-            posX = (self.incrementDisplay * incr) + adjustement + mid
-            
-            if (Float(adjustementStep + incr + 1).truncatingRemainder(dividingBy: 5) == 0) {
+            posX = (self.incrementDisplay * incr) + adjustement
+            if (Float(adjustementStep + incr).truncatingRemainder(dividingBy: 5) == 0) {
                 drawLine(p1: CGPoint(x: posX, y: size),
                          p2: CGPoint(x: posX, y: self.position.y + self.height),
                          ctx: ctx, width: 2,
@@ -177,14 +176,12 @@ class gearWheel {
         } while (posX < width)
         
         
+        // draw wheel befor middle
         incr = CGFloat(0)
         var incrF = Float(0)
-        let trunckBis =  -1 * (self.value.truncatingRemainder(dividingBy: self.increment))
-        let adjustementBis = CGFloat(trunckBis) * self.incrementDisplay / CGFloat(self.increment)
-
         while (posX > 0 && self.value + incrF >= self.min) {
-            posX = (self.incrementDisplay * incr) + adjustementBis + mid
-            
+            posX = (self.incrementDisplay * incr) + adjustement
+
             if (Float(adjustementStep + incr).truncatingRemainder(dividingBy: 5) == 0) {
                 drawLine(p1: CGPoint(x: posX, y: size),
                          p2: CGPoint(x: posX, y: self.position.y + self.height),
@@ -202,11 +199,12 @@ class gearWheel {
             incr -= 1
             incrF -= 1
         }
-
-        
-        // draw cursor
-        drawLine(p1: CGPoint(x: mid, y: self.position.y),
-                 p2: CGPoint(x: mid, y: self.position.y + self.height),
+        drawCursor(ctx: ctx, middle: mid)
+    }
+    
+    private func drawCursor(ctx: CGContext, middle: CGFloat) {
+        drawLine(p1: CGPoint(x: middle, y: self.position.y),
+                 p2: CGPoint(x: middle, y: self.position.y + self.height),
                  ctx: ctx,
                  width: 2,
                  rounded: false,
@@ -249,7 +247,7 @@ class CanvasView: UIView {
         lineWidth = 5
         minSizeTouch = 16
         minCircleSize = minSizeTouch + 4
-        self.wheel = gearWheel(value: 35, increment: 5, min: Float(minCircleSize), width: self.bounds.width, height: 25, position: CGPoint(x: 0, y: self.bounds.height - 100))
+        self.wheel = gearWheel(value: 28, increment: 5, min: Float(minCircleSize), width: self.bounds.width, height: 25, position: CGPoint(x: 0, y: self.bounds.height - 100))
     }
     
 // DISPLAY PART //
