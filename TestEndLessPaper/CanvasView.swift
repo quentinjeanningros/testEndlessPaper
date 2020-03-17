@@ -60,7 +60,6 @@ class CanvasView: UIView {
     public func setSelectedSize(size: CGFloat) {
         if (selected != nil) {
             selected!.radius = size
-            print(size)
             self.setNeedsDisplay()
         }
     }
