@@ -314,7 +314,9 @@ class CanvasView: UIView {
     }
     
     @objc func doubleTapped() {
-        newCircle(position: lastTouch)
+        if (wheelSelected == false) {
+            newCircle(position: lastTouch)
+        }
     }
     
 // ACTION PART //
