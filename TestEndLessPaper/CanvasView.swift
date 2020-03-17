@@ -145,13 +145,20 @@ class gearWheel {
         self.incrementDisplay = self.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
     }
     
+    public func IsIn(point: CGPoint, marge: CGFloat) -> Bool {
+        if (point.x > self.position.x - marge / 2 && point.x < self.position.x + self.width + marge / 2 &&
+            point.y > self.position.y - marge  / 2 && point.y < self.position.y + self.height + marge / 2){
+            return true
+        }
+        return false
+    }
+    
     public func draw(ctx: CGContext) {
         let size = self.position.y + (self.height * 50 / 100)
         let mid = self.position.x + (self.width / 2)
         let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
         let start = (value - trunck - self.min) / self.increment
         var xStart = mid - (start * self.incrementDisplay) - (trunck / self.increment *  self.incrementDisplay)
-        print(trunck)
         if (xStart > (width / 2)) {
             xStart = (width / 2 - xStart) - xStart
         }
@@ -206,6 +213,8 @@ class CanvasView: UIView {
     var diffCenterTouch: (x : CGFloat, y: CGFloat)!
     var lastTouch: CGPoint!
     var wheel: gearWheel!
+    var wheelSelected : Bool = false
+
 // PARAMS PART //
 
     var lineColor: UIColor!
@@ -242,22 +251,22 @@ class CanvasView: UIView {
         if let ctx = UIGraphicsGetCurrentContext()
         {
             if (circleArray.count > 0) {
-                
                 // draw tangent
                 for i in 0...(circleArray.count - 1) {
                     if (i - 1 >= 0) {
                         circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black, strokeWidth: lineWidth - 1.5)
                     }
                 }
-            
                 // draw circle
                 for it in circleArray {
                     it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
                 }
-                
             }
             // draw wheel
-            wheel.draw(ctx: ctx)
+            if (selected != nil) {
+                wheel.value = selected?.radius
+                wheel.draw(ctx: ctx)
+            }
         }
     }
     
@@ -267,17 +276,21 @@ class CanvasView: UIView {
         let touch = touches.first
         if (touch != nil) {
             lastTouch = touch!.location(in: self)
-            if (selected == nil) {
-                for it in circleArray {
-                    if (it.IsIn(point: lastTouch, marge: minSizeTouch)) {
-                        selected = it
-                        diffCenterTouch = (x: it.center.x - lastTouch.x, y: it.center.y - lastTouch.y)
-                        break
-                    }
+            if (selected != nil) {
+                if (wheel.IsIn(point: lastTouch, marge: minSizeTouch)) {
+                    wheelSelected = true
+                } else if (selected!.IsIn(point: lastTouch, marge: minSizeTouch) == false) {
+                    selected = nil
                 }
-            } else if (selected!.IsIn(point: lastTouch, marge: minSizeTouch) == false) {
-                selected = nil
                 self.setNeedsDisplay()
+            }
+            for it in circleArray {
+                if (it.IsIn(point: lastTouch, marge: minSizeTouch)) {
+                    selected = it
+                    diffCenterTouch = (x: it.center.x - lastTouch.x, y: it.center.y - lastTouch.y)
+                    self.setNeedsDisplay()
+                    break
+                }
             }
         }
     }
@@ -286,11 +299,18 @@ class CanvasView: UIView {
         let touch = touches.first
         if (touch != nil && selected != nil) {
             let point = touch!.location(in: self)
-            moveCircle(circle: selected!, point: point)
+            if (wheelSelected && wheel.IsIn(point: lastTouch, marge: minSizeTouch)) {
+                let value = lastTouch.x - point.x
+                selected?.radius = value > minCircleSize ? value : minCircleSize
+            } else {
+                moveCircle(circle: selected!, point: point)
+            }
+            self.setNeedsDisplay()
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        wheelSelected = false
     }
     
     @objc func doubleTapped() {
