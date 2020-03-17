@@ -124,6 +124,97 @@ class Circle {
     }
 }
 
+// WHEEL ALLOW GROW UP //
+
+class gearWheel {
+    public var value: Float!
+    private let increment: Float!
+    private let min: Float!
+    private let width: CGFloat!
+    private let height: CGFloat!
+    private let position: CGPoint!
+    private let incrementDisplay: CGFloat!
+
+    init(value: Float, increment: Float, min: Float, width: CGFloat, height: CGFloat, position: CGPoint) {
+        self.value = value
+        self.increment = increment
+        self.min = min
+        self.width = width
+        self.height = height
+        self.position = position
+        self.incrementDisplay = self.width * 2.5 / 100 // consider  1 incrementDisplay = 1 increment
+    }
+    
+    public func draw(ctx: CGContext) {
+        let size = self.position.y + (self.height * 50 / 100)
+        let mid = self.position.x + (self.width / 2)
+        let trunck =  -1 * (self.value.truncatingRemainder(dividingBy: self.increment) - self.increment)
+        let adjustement = CGFloat(trunck) * self.incrementDisplay / CGFloat(self.increment)
+        let adjustementStep = CGFloat(self.value - trunck.truncatingRemainder(dividingBy: 1))
+
+        var incr = CGFloat(0)
+        var posX: CGFloat
+        
+        // draw wheel
+        repeat {
+            posX = (self.incrementDisplay * incr) + adjustement + mid
+            
+            if (Float(adjustementStep + incr + 1).truncatingRemainder(dividingBy: 5) == 0) {
+                drawLine(p1: CGPoint(x: posX, y: size),
+                         p2: CGPoint(x: posX, y: self.position.y + self.height),
+                         ctx: ctx, width: 2,
+                         rounded: false,
+                         color: UIColor.black)
+            } else {
+                drawLine(p1: CGPoint(x: posX, y: size),
+                         p2: CGPoint(x: posX, y: self.position.y + self.height),
+                         ctx: ctx, width: 1,
+                         rounded: false,
+                         color: UIColor.black)
+            }
+            ctx.strokePath()
+            incr += 1
+        } while (posX < width)
+        
+        
+        incr = CGFloat(0)
+        var incrF = Float(0)
+        let trunckBis =  -1 * (self.value.truncatingRemainder(dividingBy: self.increment))
+        let adjustementBis = CGFloat(trunckBis) * self.incrementDisplay / CGFloat(self.increment)
+
+        while (posX > 0 && self.value + incrF >= self.min) {
+            posX = (self.incrementDisplay * incr) + adjustementBis + mid
+            
+            if (Float(adjustementStep + incr).truncatingRemainder(dividingBy: 5) == 0) {
+                drawLine(p1: CGPoint(x: posX, y: size),
+                         p2: CGPoint(x: posX, y: self.position.y + self.height),
+                         ctx: ctx, width: 2,
+                         rounded: false,
+                         color: UIColor.black)
+            } else {
+                drawLine(p1: CGPoint(x: posX, y: size),
+                         p2: CGPoint(x: posX, y: self.position.y + self.height),
+                         ctx: ctx, width: 1,
+                         rounded: false,
+                         color: UIColor.black)
+            }
+            ctx.strokePath()
+            incr -= 1
+            incrF -= 1
+        }
+
+        
+        // draw cursor
+        drawLine(p1: CGPoint(x: mid, y: self.position.y),
+                 p2: CGPoint(x: mid, y: self.position.y + self.height),
+                 ctx: ctx,
+                 width: 2,
+                 rounded: false,
+                 color: UIColor.link)
+        ctx.strokePath()
+    }
+    
+}
 
 // VIEW //
 
@@ -135,7 +226,7 @@ class CanvasView: UIView {
     var selected: Circle?
     var diffCenterTouch: (x : CGFloat, y: CGFloat)!
     var lastTouch: CGPoint!
-    
+    var wheel: gearWheel!
 // PARAMS PART //
 
     var lineColor: UIColor!
@@ -157,7 +248,8 @@ class CanvasView: UIView {
         lineColorSelect = UIColor.link
         lineWidth = 5
         minSizeTouch = 16
-        minCircleSize = minSizeTouch + 10
+        minCircleSize = minSizeTouch + 4
+        self.wheel = gearWheel(value: 35, increment: 5, min: Float(minCircleSize), width: self.bounds.width, height: 25, position: CGPoint(x: 0, y: self.bounds.height - 100))
     }
     
 // DISPLAY PART //
@@ -179,7 +271,10 @@ class CanvasView: UIView {
                 for it in circleArray {
                     it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
                 }
+                
             }
+            // draw wheel
+            wheel.draw(ctx: ctx)
         }
     }
     
