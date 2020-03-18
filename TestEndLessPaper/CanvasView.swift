@@ -32,16 +32,13 @@ class CanvasView: UIView {
     
     public var selectedRadius : CGFloat {
         get {
-            if (_selected != nil) {
-                return self._selected!.radius
-            }
-            return CGFloat.nan
+            guard (_selected != nil) else {return CGFloat.nan}
+            return self._selected!.radius
         }
         set {
-            if (_selected != nil) {
-                self._selected!.radius = newValue
-                self.setNeedsDisplay()
-            }
+            guard (_selected != nil) else { return }
+            self._selected!.radius = newValue
+            self.setNeedsDisplay()
         }
     }
     
@@ -53,10 +50,9 @@ class CanvasView: UIView {
             return nil
         }
         set {
-            if (_selected != nil && newValue != nil) {
-                self._selected!.center = newValue!
-                self.setNeedsDisplay()
-            }
+            guard (_selected != nil && newValue != nil) else { return }
+            self._selected!.center = newValue!
+            self.setNeedsDisplay()
         }
     }
     

@@ -59,18 +59,16 @@ class GearWheel: UIView {
 //MARK: TOUCH PART
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        if (touch != nil) {
-            self.lastX = touch!.location(in: self).x
+        if let touch = touches.first {
+            self.lastX = touch.location(in: self).x
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        if (touch != nil) {
+        if let touch = touches.first {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            self.value  = (self.lastX - touch!.location(in: self).x) * speed / incrementDisplay + self.value!
-            lastX = touch!.location(in: self).x
+            self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value!
+            lastX = touch.location(in: self).x
         }
     }
     

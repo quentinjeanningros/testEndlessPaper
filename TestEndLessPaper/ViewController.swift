@@ -57,7 +57,6 @@ class ViewController: UIViewController {
         }
     }
     
-    
 //MARK: ACTION PART
     
     @IBAction func clearCanvas(_ sender: Any) {
