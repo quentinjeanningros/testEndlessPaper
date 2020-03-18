@@ -38,23 +38,28 @@ class ViewController: UIViewController {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             lastTouch = touch.location(in: self.view)
-            canvasView.selected =  canvasView.getCircle(point: lastTouch, tolerance: minSizeTouch)
+            guard (!gearWheel.contains(point: lastTouch, tolerance: minSizeTouch + 5)) else { return }
+            
+            canvasView.selected = canvasView.getCircle(point: lastTouch, tolerance: minSizeTouch)
             if let circle = canvasView.selected {
-                diffCenterTouch = CGPoint(x: circle.center.x - lastTouch.x,
-                                          y:  circle.center.y - lastTouch.y)
+                diffCenterTouch = CGPoint(x: circle.center.x - lastTouch.x, y:  circle.center.y - lastTouch.y)
                 displayWheel(display: true, circle: circle)
-            } else if (!gearWheel.contains(point: lastTouch, tolerance: minSizeTouch)) {
+            } else {
                 displayWheel(display: false)
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard canvasView.selected != nil else { return }
+        guard (canvasView.selected != nil && self.diffCenterTouch != nil) else { return }
         if let touch = touches.first {
             let point = touch.location(in: self.view)
             canvasView.selectedCenter = CGPoint(x: point.x + self.diffCenterTouch.x, y: point.y + self.diffCenterTouch.y)
         }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.diffCenterTouch = nil
     }
     
 //MARK: ACTION PART
