@@ -43,7 +43,7 @@ class ViewController: UIViewController {
                 diffCenterTouch = CGPoint(x: circle.center.x - lastTouch.x,
                                           y:  circle.center.y - lastTouch.y)
                 displayWheel(display: true, circle: circle)
-            } else {
+            } else if (!gearWheel.contains(point: lastTouch, tolerance: minSizeTouch)) {
                 displayWheel(display: false)
             }
         }

@@ -63,6 +63,11 @@ class GearWheel: UIView {
         }
     }
     
+    func contains(point: CGPoint, tolerance: CGFloat) -> Bool {
+        return (point.x > self.frame.minX - tolerance && point.x < self.frame.maxX + tolerance &&
+        point.y > self.frame.minY - tolerance && point.y < self.frame.maxY + tolerance)
+    }
+    
 // DRAW PART //
     
     override func draw(_ rect: CGRect) {
