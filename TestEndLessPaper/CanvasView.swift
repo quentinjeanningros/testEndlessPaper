@@ -10,7 +10,7 @@ import UIKit
 
 class CanvasView: UIView {
 
-// PARAMS PART //
+//MARK: PARAMS PART
 
     private var lineColor: UIColor = UIColor.black
     private var lineColorSelect: UIColor = UIColor.link
@@ -19,7 +19,7 @@ class CanvasView: UIView {
     private var circleArray: Array<Circle> = Array()
     private var selected: Circle!
     
-// DISPLAY PART //
+//MARK: DISPLAY PART
     
     override public func draw(_ rect: CGRect)
     {
@@ -37,7 +37,7 @@ class CanvasView: UIView {
     }
 
     
-// ACTION PART //
+//MARK: ACTION PART
     
     public func getCircle(point: CGPoint, tolerance: CGFloat) -> Circle? {
         for it in circleArray {

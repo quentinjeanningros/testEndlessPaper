@@ -12,7 +12,7 @@ class GearWheel: UIView {
     
     typealias Callback = (CGFloat) -> ()
     
-// UTILS PARAMS PART //
+//MARK: UTILS PARAMS PART
 
     private var value: CGFloat!
     private var increment: CGFloat!
@@ -23,7 +23,7 @@ class GearWheel: UIView {
     
     private var speed: CGFloat!
 
-// INIT PART //
+//MARK: INIT PART
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,7 +43,7 @@ class GearWheel: UIView {
         self.speed = speed
     }
 
-// TOUCH PART //
+//MARK: TOUCH PART
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
@@ -68,7 +68,7 @@ class GearWheel: UIView {
         point.y > self.frame.minY - tolerance && point.y < self.frame.maxY + tolerance)
     }
     
-// DRAW PART //
+//MARK: DRAW PART
     
     override func draw(_ rect: CGRect) {
         guard self.value != nil else { return }
@@ -122,7 +122,7 @@ class GearWheel: UIView {
         ctx.strokePath()
     }
     
-// ACTION PART //
+//MARK: ACTION PART
     
     public func setValue(value : CGFloat) {
         self.value = value

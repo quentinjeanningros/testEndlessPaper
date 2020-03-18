@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     var diffCenterTouch: CGPoint!
     var lastTouch: CGPoint!
     
-// INIT PART //
+//MARK: INIT PART
     
     override func viewDidLoad() {
         self.view.clipsToBounds = true
@@ -33,7 +33,7 @@ class ViewController: UIViewController {
         gearWheel.callback = selectedCircleSizeChanged
     }
     
-// TOUCH PART //
+//MARK: TOUCH PART
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
@@ -59,7 +59,7 @@ class ViewController: UIViewController {
     }
     
     
-// ACTION PART //
+//MARK: ACTION PART
     
     @IBAction func clearCanvas(_ sender: Any) {
         canvasView.select(circle: nil)

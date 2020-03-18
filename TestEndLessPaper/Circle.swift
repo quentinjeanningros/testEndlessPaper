@@ -9,7 +9,9 @@
 import UIKit
 
 class Circle {
-    //property
+    
+//MARK: INIT
+    
         public var center: CGPoint
         public var radius: CGFloat
 
@@ -22,7 +24,7 @@ class Circle {
             return distance(c1: point.x - self.center.x, c2: point.y - self.center.y) <= self.radius + tolerance / 2 + tolerance
         }
         
-    // DRAW PART //
+//MARK: DRAW PART
         
         public func draw(ctx: CGContext, color: UIColor, strokeWidth: CGFloat) {
             ctx.setLineWidth(strokeWidth)
@@ -59,7 +61,7 @@ class Circle {
             }
         }
         
-    // CALCUL PART //
+//MARK: CALCUL PART
         
         private func computeTangents(circle: Circle) -> Array<CGPoint> {
             // formula https://en.wikipedia.org/wiki/Tangent_lines_to_circles
