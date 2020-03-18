@@ -10,18 +10,31 @@ import UIKit
 
 class GearWheel: UIView {
     
-    typealias Callback = (CGFloat) -> ()
+    typealias ActionUpdate = (CGFloat) -> ()
     
 //MARK: UTILS PARAMS PART
 
-    private var value: CGFloat!
+    private var _value: CGFloat?
     private var increment: CGFloat!
     private var min: CGFloat!
     private var lastX: CGFloat!
     
-    public var callback: Callback?
+    public var actionUpdate: ActionUpdate?
     
     private var speed: CGFloat!
+    
+    public var value : CGFloat? {
+        get {
+            return self._value
+        }
+        set {
+            self._value = newValue! > min ? newValue : min
+            if (self.actionUpdate != nil) {
+                self.actionUpdate!(newValue!)
+            }
+            self.setNeedsDisplay()
+        }
+    }
 
 //MARK: INIT PART
     
@@ -56,10 +69,8 @@ class GearWheel: UIView {
         let touch = touches.first
         if (touch != nil) {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            let newValue = (self.lastX - touch!.location(in: self).x) * speed / incrementDisplay + self.value
-            setValue(value: newValue > min ? newValue : min)
+            self.value  = (self.lastX - touch!.location(in: self).x) * speed / incrementDisplay + self.value!
             lastX = touch!.location(in: self).x
-            self.setNeedsDisplay()
         }
     }
     
@@ -77,15 +88,15 @@ class GearWheel: UIView {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
             let gearHeight = self.bounds.height * 40 / 100
             let mid = self.bounds.width / 2
-            let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
-            let start = (self.value - trunck - self.min) / self.increment
+            let trunck = self.value!.truncatingRemainder(dividingBy: self.increment)
+            let start = (self.value! - trunck - self.min) / self.increment
             var xStart = mid - (start * incrementDisplay) - (trunck / self.increment *  incrementDisplay)
             if (xStart > (self.bounds.width / 2)) {
                 xStart = (self.bounds.width / 2 - xStart) - xStart
             }
             
             let step = self.increment * 5
-            let trunckStep = self.value - self.value.truncatingRemainder(dividingBy: self.increment * 5)
+            let trunckStep = self.value! - self.value!.truncatingRemainder(dividingBy: self.increment * 5)
             
             var incr = CGFloat(0)
             var x: CGFloat
@@ -120,16 +131,5 @@ class GearWheel: UIView {
                  rounded: false,
                  color: UIColor.link)
         ctx.strokePath()
-    }
-    
-//MARK: ACTION PART
-    
-    public func setValue(value : CGFloat) {
-        self.value = value
-        if (self.callback != nil) {
-            self.callback!(value)
-        }
-        self.setNeedsDisplay()
-
     }
 }

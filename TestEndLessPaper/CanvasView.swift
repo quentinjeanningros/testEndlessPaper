@@ -17,7 +17,48 @@ class CanvasView: UIView {
     private var lineWidth: CGFloat = 5
     
     private var circleArray: Array<Circle> = Array()
-    private var selected: Circle!
+    
+    private var _selected: Circle?
+    
+    public var selected : Circle? {
+        get {
+            return self._selected
+        }
+        set {
+            self._selected = newValue
+            self.setNeedsDisplay()
+        }
+    }
+    
+    public var selectedRadius : CGFloat {
+        get {
+            if (_selected != nil) {
+                return self._selected!.radius
+            }
+            return CGFloat.nan
+        }
+        set {
+            if (_selected != nil) {
+                self._selected!.radius = newValue
+                self.setNeedsDisplay()
+            }
+        }
+    }
+    
+    public var selectedCenter : CGPoint? {
+        get {
+            if (_selected != nil) {
+                return self._selected!.center
+            }
+            return nil
+        }
+        set {
+            if (_selected != nil && newValue != nil) {
+                self._selected!.center = newValue!
+                self.setNeedsDisplay()
+            }
+        }
+    }
     
 //MARK: DISPLAY PART
     
@@ -31,7 +72,7 @@ class CanvasView: UIView {
             }
             // draw circle
             for it in circleArray {
-                it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
+                it.draw(ctx: ctx, color: it === _selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
             }
         }
     }
@@ -48,20 +89,8 @@ class CanvasView: UIView {
         return (nil)
     }
     
-    public func moveCircle(circle: Circle, point: CGPoint, diffCenterTouch: CGPoint = CGPoint(x: 0, y: 0)) {
-        circle.center = CGPoint(x: point.x + diffCenterTouch.x, y: point.y + diffCenterTouch.y)
-        self.setNeedsDisplay()
-    }
-    
-    public func setCircleSize(circle: Circle!, size: CGFloat) {
-        if (circle != nil) {
-            circle.radius = size
-            self.setNeedsDisplay()
-        }
-    }
-    
     public func newCircle(position: CGPoint, size: CGFloat) -> Circle? {
-        let circle =  Circle(center: position, radius: size)
+        let circle = Circle(center: position, radius: size)
         self.circleArray.append(circle)
         return (circle)
     }
@@ -69,14 +98,5 @@ class CanvasView: UIView {
     public func clearCanvas() {
         self.circleArray.removeAll()
         self.setNeedsDisplay()
-    }
-    
-    public func select(circle: Circle?) {
-        self.selected = circle
-        self.setNeedsDisplay()
-    }
-    
-    public func getSelectedCircle() -> Circle? {
-        return (self.selected)
     }
 }
