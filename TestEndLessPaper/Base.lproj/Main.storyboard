@@ -31,12 +31,22 @@
                                         <color key="textColor" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Double tap to create a circle" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cww-Uh-dWN">
+                                        <rect key="frame" x="8" y="418" width="398" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="stc-es-Wma" secondAttribute="trailing" constant="8" id="7l3-tT-0Lb"/>
                                     <constraint firstAttribute="bottom" secondItem="stc-es-Wma" secondAttribute="bottom" constant="46" id="Iqp-YR-cfY"/>
+                                    <constraint firstItem="cww-Uh-dWN" firstAttribute="top" secondItem="oQf-Tp-74N" secondAttribute="top" constant="418" id="R7a-1U-zgn"/>
+                                    <constraint firstAttribute="trailing" secondItem="cww-Uh-dWN" secondAttribute="trailing" constant="8" id="SG4-IW-aFi"/>
+                                    <constraint firstItem="F4e-8Q-iGa" firstAttribute="top" secondItem="cww-Uh-dWN" secondAttribute="bottom" constant="312" id="Zov-vU-EFf"/>
+                                    <constraint firstItem="cww-Uh-dWN" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="a6X-IR-gkw"/>
                                     <constraint firstItem="F4e-8Q-iGa" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="20" symbolic="YES" id="gBZ-Vm-ZAy"/>
                                     <constraint firstItem="stc-es-Wma" firstAttribute="top" secondItem="F4e-8Q-iGa" secondAttribute="bottom" constant="6" id="oMR-qo-B78"/>
                                     <constraint firstItem="stc-es-Wma" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="ujP-wg-dOa"/>
@@ -73,6 +83,7 @@
                         </connections>
                     </view>
                     <connections>
+                        <outlet property="TutorialLabel" destination="cww-Uh-dWN" id="prf-cP-vBQ"/>
                         <outlet property="canvasView" destination="oQf-Tp-74N" id="Qqh-Q2-fca"/>
                         <outlet property="gearWheel" destination="stc-es-Wma" id="TYo-Am-lpR"/>
                         <outlet property="radiusLabel" destination="F4e-8Q-iGa" id="yV4-R3-jQo"/>

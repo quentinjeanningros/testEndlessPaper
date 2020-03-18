@@ -13,6 +13,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var canvasView: CanvasView!
     @IBOutlet weak var gearWheel: GearWheel!
     @IBOutlet weak var radiusLabel: UILabel!
+    @IBOutlet weak var TutorialLabel: UILabel!
     
     var minSizeTouch: CGFloat!
     var minCircleSize: CGFloat!
@@ -64,11 +65,13 @@ class ViewController: UIViewController {
         canvasView.select(circle: nil)
         canvasView.clearCanvas()
         displayWheel(display: false)
+        TutorialLabel.isHidden = false
     }
     
     @IBAction func doubleTapped(_ sender: Any) {
         canvasView.select(circle: canvasView.newCircle(position: lastTouch, size: minCircleSize + 20))
         displayWheel(display: true, circle: canvasView.getSelectedCircle())
+        TutorialLabel.isHidden = true
     }
     
     private func displayWheel(display: Bool ,circle: Circle? = nil) {
