@@ -25,7 +25,7 @@
                                             <constraint firstAttribute="height" constant="30" id="Qs6-7M-twR"/>
                                         </constraints>
                                     </view>
-                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F4e-8Q-iGa">
+                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F4e-8Q-iGa" userLabel="Radius Label">
                                         <rect key="frame" x="20" y="751" width="374" height="23"/>
                                         <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
                                         <color key="textColor" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -33,6 +33,7 @@
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="stc-es-Wma" secondAttribute="trailing" constant="8" id="7l3-tT-0Lb"/>
                                     <constraint firstAttribute="bottom" secondItem="stc-es-Wma" secondAttribute="bottom" constant="46" id="Iqp-YR-cfY"/>
@@ -41,6 +42,9 @@
                                     <constraint firstItem="stc-es-Wma" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="ujP-wg-dOa"/>
                                     <constraint firstAttribute="trailing" secondItem="F4e-8Q-iGa" secondAttribute="trailing" constant="20" symbolic="YES" id="vBS-dM-E1C"/>
                                 </constraints>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="EBv-aF-TD4" appends="YES" id="iHm-gp-wS3"/>
+                                </connections>
                             </view>
                             <button opaque="NO" alpha="0.5" contentMode="scaleToFill" restorationIdentifier="ClearButton" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fEg-7a-UUJ">
                                 <rect key="frame" x="50" y="832" width="36" height="30"/>
@@ -53,6 +57,7 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fEg-7a-UUJ" secondAttribute="bottom" id="7cv-UI-f6c"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Iaf-wY-bD1"/>
@@ -63,14 +68,22 @@
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="wc2-d9-qAk"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="EBv-aF-TD4" appends="YES" id="WY5-YN-js9"/>
+                        </connections>
                     </view>
                     <connections>
-                        <outlet property="SizeLabel" destination="F4e-8Q-iGa" id="Ww1-kN-oQC"/>
                         <outlet property="canvasView" destination="oQf-Tp-74N" id="Qqh-Q2-fca"/>
                         <outlet property="gearWheel" destination="stc-es-Wma" id="TYo-Am-lpR"/>
+                        <outlet property="radiusLabel" destination="F4e-8Q-iGa" id="yV4-R3-jQo"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer numberOfTapsRequired="2" id="EBv-aF-TD4">
+                    <connections>
+                        <action selector="doubleTapped:" destination="BYZ-38-t0r" id="6Yv-hG-TYK"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="137.68115942028987" y="126.5625"/>
         </scene>

@@ -14,32 +14,33 @@ class GearWheel: UIView {
     
 // UTILS PARAMS PART //
 
-    public var value: CGFloat!
+    private var value: CGFloat!
     private var increment: CGFloat!
     private var min: CGFloat!
     private var lastX: CGFloat!
     
-    public var callback: Callback!
-
-// UX PARAMS PART //
+    public var callback: Callback?
     
     private var speed: CGFloat!
-    private var incrementDisplay: CGFloat!
-    private var size: CGFloat!
-    private var ready: Bool = false
 
 // INIT PART //
     
-    public func communInit(callback: @escaping Callback, increment: CGFloat, min: CGFloat, speed: CGFloat) {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         self.clipsToBounds = true
         self.isMultipleTouchEnabled = false
-
-        self.callback = callback
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        self.clipsToBounds = true
+        self.isMultipleTouchEnabled = false
+    }
+    
+    public func initArgs(increment: CGFloat, min: CGFloat, speed: CGFloat) {
         self.increment = increment
         self.min = min
         self.speed = speed
-        self.incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-        self.size = self.bounds.height * 40 / 100
     }
 
 // TOUCH PART //
@@ -54,28 +55,26 @@ class GearWheel: UIView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         if (touch != nil) {
-            let newValue = (self.lastX - touch!.location(in: self).x) * speed / self.incrementDisplay + self.value
-            self.value = newValue > min ? newValue : min
+            let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
+            let newValue = (self.lastX - touch!.location(in: self).x) * speed / incrementDisplay + self.value
+            setValue(value: newValue > min ? newValue : min)
             lastX = touch!.location(in: self).x
             self.setNeedsDisplay()
-            if (self.callback != nil) {
-                self.callback(self.value)
-            }
         }
     }
     
 // DRAW PART //
     
     override func draw(_ rect: CGRect) {
-        if (self.value == nil) {
-            return
-        }
+        guard self.value != nil else { return }
         if let ctx = UIGraphicsGetCurrentContext()
         {
+            let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
+            let gearHeight = self.bounds.height * 40 / 100
             let mid = self.bounds.width / 2
             let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
             let start = (self.value - trunck - self.min) / self.increment
-            var xStart = mid - (start * self.incrementDisplay) - (trunck / self.increment *  self.incrementDisplay)
+            var xStart = mid - (start * incrementDisplay) - (trunck / self.increment *  incrementDisplay)
             if (xStart > (self.bounds.width / 2)) {
                 xStart = (self.bounds.width / 2 - xStart) - xStart
             }
@@ -87,15 +86,15 @@ class GearWheel: UIView {
             var x: CGFloat
             
             repeat {
-                x = (incr * self.incrementDisplay) + xStart
+                x = (incr * incrementDisplay) + xStart
                 if (((incr * self.increment) + trunckStep).truncatingRemainder(dividingBy: step) == 0) {
-                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - self.size),
+                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
                              p2: CGPoint(x: x, y: self.bounds.height),
                              ctx: ctx, width: 1,
                              rounded: false,
                              color: UIColor.black)
                 } else {
-                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - self.size),
+                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
                              p2: CGPoint(x: x, y: self.bounds.height),
                              ctx: ctx, width: 1,
                              rounded: false,
@@ -122,6 +121,10 @@ class GearWheel: UIView {
     
     public func setValue(value : CGFloat) {
         self.value = value
+        if (self.callback != nil) {
+            self.callback!(value)
+        }
         self.setNeedsDisplay()
+
     }
 }

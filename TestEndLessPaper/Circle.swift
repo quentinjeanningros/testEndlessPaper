@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Circle: NSObject {
+class Circle {
     //property
         public var center: CGPoint
         public var radius: CGFloat
@@ -18,11 +18,8 @@ class Circle: NSObject {
             self.radius = radius
         }
         
-        public func IsIn(point: CGPoint, marge: CGFloat) -> Bool {
-            if (distance(c1: point.x - self.center.x, c2: point.y - self.center.y) <= self.radius + marge / 2 + marge){
-                return true
-            }
-            return false
+        func contains(point: CGPoint, tolerance: CGFloat) -> Bool {
+            return distance(c1: point.x - self.center.x, c2: point.y - self.center.y) <= self.radius + tolerance / 2 + tolerance
         }
         
     // DRAW PART //

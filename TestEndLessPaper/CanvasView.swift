@@ -16,26 +16,22 @@ class CanvasView: UIView {
     private var lineColorSelect: UIColor = UIColor.link
     private var lineWidth: CGFloat = 5
     
-    public var circleArray: Array<Circle> = Array()
-    public var selected: Circle!
+    private var circleArray: Array<Circle> = Array()
+    private var selected: Circle!
     
 // DISPLAY PART //
     
     override public func draw(_ rect: CGRect)
     {
+        guard circleArray.count > 0 else { return }
         if let ctx = UIGraphicsGetCurrentContext()
         {
-            if (circleArray.count > 0) {
-                // draw tangent
-                for i in 0...(circleArray.count - 1) {
-                    if (i - 1 >= 0) {
-                        circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black, strokeWidth: lineWidth - 1.5)
-                    }
-                }
-                // draw circle
-                for it in circleArray {
-                    it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
-                }
+            for i in 1..<circleArray.count {
+                circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black, strokeWidth: lineWidth - 1.5)
+            }
+            // draw circle
+            for it in circleArray {
+                it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
             }
         }
     }
@@ -43,9 +39,9 @@ class CanvasView: UIView {
     
 // ACTION PART //
     
-    public func getACircle(point: CGPoint, marge: CGFloat) -> Circle? {
+    public func getCircle(point: CGPoint, tolerance: CGFloat) -> Circle? {
         for it in circleArray {
-            if (it.IsIn(point: point, marge: marge)) {
+            if (it.contains(point: point, tolerance: tolerance)) {
                 return (it)
             }
         }
@@ -78,5 +74,9 @@ class CanvasView: UIView {
     public func select(circle: Circle?) {
         self.selected = circle
         self.setNeedsDisplay()
+    }
+    
+    public func getSelectedCircle() -> Circle? {
+        return (self.selected)
     }
 }
