@@ -16,36 +16,22 @@ class CanvasView: UIView {
     private var lineColorSelect: UIColor = UIColor.link
     private var lineWidth: CGFloat = 5
     
-    private var circleArray: Array<Circle> = Array()
+    private var circleArray = [Circle]()
     
-    public var selected : Circle? {
+    public var selected: Int = -1 {
         didSet {
             self.setNeedsDisplay()
         }
     }
     
-    public var selectedRadius : CGFloat? {
+    public var selectedCircle : Circle? {
         get {
-            guard (selected != nil) else {return nil}
-            return self.selected!.radius
+            guard (selected >= 0 && selected < circleArray.count) else { return nil}
+            return circleArray[selected]
         }
         set {
-            guard (selected != nil && newValue != nil) else { return }
-            self.selected!.radius = newValue!
-            self.setNeedsDisplay()
-        }
-    }
-    
-    public var selectedCenter : CGPoint? {
-        get {
-            if (selected != nil) {
-                return self.selected!.center
-            }
-            return nil
-        }
-        set {
-            guard let sel = selected, let newCenter = newValue  else { return }
-            sel.center = newCenter
+            guard (selected >= 0 || selected < circleArray.count) else { return }
+            circleArray[selected] = newValue!
             self.setNeedsDisplay()
         }
     }
@@ -63,27 +49,28 @@ class CanvasView: UIView {
                                        strokeWidth: lineWidth - 1.5)
         }
         // draw circle
-        for it in circleArray {
-            it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
+        for (index, it) in circleArray.enumerated() {
+            it.draw(ctx: ctx, color: selected == index ? lineColorSelect : lineColor, strokeWidth: lineWidth)
         }
     }
 
     
 //MARK: ACTION PART
     
-    public func getCircle(under: CGPoint, tolerance: CGFloat) -> Circle? {
-        for it in circleArray {
+    public func getCircleUnder(under: CGPoint, tolerance: CGFloat) -> Int {
+        for (index, it) in circleArray.enumerated() {
             if (it.contains(point: under, tolerance: tolerance)) {
-                return (it)
+                return (index)
             }
         }
-        return (nil)
+        return (-1)
     }
     
-    public func newCircle(position: CGPoint, size: CGFloat) -> Circle? {
+    public func newCircle(position: CGPoint, size: CGFloat) -> Int {
         let circle = Circle(center: position, radius: size)
+        let index = circleArray.count
         self.circleArray.append(circle)
-        return (circle)
+        return (index)
     }
 
     public func clearCanvas() {

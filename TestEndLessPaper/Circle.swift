@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Circle {
+struct Circle {
     
 //MARK: INIT
     

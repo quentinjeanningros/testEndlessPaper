@@ -37,8 +37,8 @@ class ViewController: UIViewController {
             lastTouch = touch.location(in: self.view)
             guard (!gearWheel.contains(point: lastTouch, tolerance: minSizeTouch + 5)) else { return }
             
-            canvasView.selected = canvasView.getCircle(under: lastTouch, tolerance: minSizeTouch)
-            if let circle = canvasView.selected {
+            canvasView.selected = canvasView.getCircleUnder(under: lastTouch, tolerance: minSizeTouch)
+            if let circle = canvasView.selectedCircle {
                 diffCenterTouch = CGPoint(x: circle.center.x - lastTouch.x, y:  circle.center.y - lastTouch.y)
                 toggleWheel(circle: circle)
             } else {
@@ -48,10 +48,10 @@ class ViewController: UIViewController {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard (canvasView.selected != nil && self.diffCenterTouch != nil) else { return }
+        guard (canvasView.selectedCircle != nil && self.diffCenterTouch != nil) else { return }
         if let touch = touches.first {
             let point = touch.location(in: self.view)
-            canvasView.selectedCenter = CGPoint(x: point.x + self.diffCenterTouch.x, y: point.y + self.diffCenterTouch.y)
+            canvasView.selectedCircle!.center = CGPoint(x: point.x + self.diffCenterTouch.x, y: point.y + self.diffCenterTouch.y)
         }
     }
     
@@ -62,7 +62,7 @@ class ViewController: UIViewController {
 //MARK: ACTION PART
     
     @IBAction func clearCanvas(_ sender: Any) {
-        canvasView.selected = nil
+        //canvasView.selected = nil
         canvasView.clearCanvas()
         toggleWheel()
         TutorialLabel.isHidden = false
@@ -70,7 +70,7 @@ class ViewController: UIViewController {
     
     @IBAction func doubleTapped(_ sender: Any) {
         canvasView.selected = canvasView.newCircle(position: lastTouch, size: minCircleSize + 20)
-        toggleWheel(circle: canvasView.selected)
+        toggleWheel(circle: canvasView.selectedCircle)
         TutorialLabel.isHidden = true
     }
     
@@ -86,9 +86,9 @@ class ViewController: UIViewController {
     }
     
     private func selectedCircleSizeChanged(size: CGFloat) {
-        if let circle = canvasView.selected {
-            canvasView.selectedRadius = size
-            radiusLabel.text = Double(round(10 * circle.radius) / 10).description
+        if (canvasView.selectedCircle != nil) {
+            canvasView.selectedCircle!.radius = size
+            radiusLabel.text = Double(round(10 * canvasView.selectedCircle!.radius) / 10).description
         }
     }
     
