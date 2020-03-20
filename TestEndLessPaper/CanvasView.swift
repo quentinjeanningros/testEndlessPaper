@@ -18,40 +18,34 @@ class CanvasView: UIView {
     
     private var circleArray: Array<Circle> = Array()
     
-    private var _selected: Circle?
-    
     public var selected : Circle? {
-        get {
-            return self._selected
-        }
-        set {
-            self._selected = newValue
+        didSet {
             self.setNeedsDisplay()
         }
     }
     
-    public var selectedRadius : CGFloat {
+    public var selectedRadius : CGFloat? {
         get {
-            guard (_selected != nil) else {return CGFloat.nan}
-            return self._selected!.radius
+            guard (selected != nil) else {return nil}
+            return self.selected!.radius
         }
         set {
-            guard (_selected != nil) else { return }
-            self._selected!.radius = newValue
+            guard (selected != nil && newValue != nil) else { return }
+            self.selected!.radius = newValue!
             self.setNeedsDisplay()
         }
     }
     
     public var selectedCenter : CGPoint? {
         get {
-            if (_selected != nil) {
-                return self._selected!.center
+            if (selected != nil) {
+                return self.selected!.center
             }
             return nil
         }
         set {
-            guard (_selected != nil && newValue != nil) else { return }
-            self._selected!.center = newValue!
+            guard let sel = selected, let newCenter = newValue  else { return }
+            sel.center = newCenter
             self.setNeedsDisplay()
         }
     }
@@ -61,24 +55,25 @@ class CanvasView: UIView {
     override public func draw(_ rect: CGRect)
     {
         guard circleArray.count > 0 else { return }
-        if let ctx = UIGraphicsGetCurrentContext()
-        {
-            for i in 1..<circleArray.count {
-                circleArray[i].drawTangent(ctx: ctx, circle: circleArray[i - 1], color: UIColor.black, strokeWidth: lineWidth - 1.5)
-            }
-            // draw circle
-            for it in circleArray {
-                it.draw(ctx: ctx, color: it === _selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
-            }
+        guard let ctx = UIGraphicsGetCurrentContext() else { return }
+        for i in 1..<circleArray.count {
+            circleArray[i].drawTangent(ctx: ctx,
+                                       circle: circleArray[i - 1],
+                                       color: UIColor.black,
+                                       strokeWidth: lineWidth - 1.5)
+        }
+        // draw circle
+        for it in circleArray {
+            it.draw(ctx: ctx, color: it === selected ? lineColorSelect : lineColor, strokeWidth: lineWidth)
         }
     }
 
     
 //MARK: ACTION PART
     
-    public func getCircle(point: CGPoint, tolerance: CGFloat) -> Circle? {
+    public func getCircle(under: CGPoint, tolerance: CGFloat) -> Circle? {
         for it in circleArray {
-            if (it.contains(point: point, tolerance: tolerance)) {
+            if (it.contains(point: under, tolerance: tolerance)) {
                 return (it)
             }
         }

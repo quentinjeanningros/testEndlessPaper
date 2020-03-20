@@ -8,52 +8,63 @@
 
 import UIKit
 
-class GearWheel: UIView {
+@IBDesignable class GearWheel: UIView {
     
     typealias ActionUpdate = (CGFloat) -> ()
     
 //MARK: UTILS PARAMS PART
-
-    private var _value: CGFloat?
-    private var increment: CGFloat!
-    private var min: CGFloat!
-    private var lastX: CGFloat!
     
-    public var actionUpdate: ActionUpdate?
-    
-    private var speed: CGFloat!
-    
-    public var value : CGFloat? {
-        get {
-            return self._value
-        }
-        set {
-            self._value = newValue! > min ? newValue : min
-            if (self.actionUpdate != nil) {
-                self.actionUpdate!(newValue!)
+    @IBInspectable var value: CGFloat = 5 {
+        didSet {
+            value = value > min ? value : min
+            if (self.onValueChange != nil) {
+                self.onValueChange!(value)
             }
             self.setNeedsDisplay()
         }
     }
+    @IBInspectable var min: CGFloat = 0 {
+        didSet {
+            guard value < min else { return }
+            value = min
+        }
+    }
+    @IBInspectable var increment: CGFloat = 5 {
+        didSet {
+            increment = increment > 0 ? increment : 1
+            self.setNeedsDisplay()
+        }
+    }
+    @IBInspectable var step: CGFloat = 5 {
+        didSet {
+            step = step > 0 ? step : 1
+            self.setNeedsDisplay()
+        }
+    }
+    @IBInspectable var speed: CGFloat = 4
+    @IBInspectable var gearColor: UIColor = UIColor.lightGray
+    @IBInspectable var stepColor: UIColor = UIColor.black
+    @IBInspectable var cursorColor: UIColor = UIColor.link
+    
+    public var onValueChange: ActionUpdate?
 
+    private var lastX: CGFloat = 0
+    
 //MARK: INIT PART
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.clipsToBounds = true
-        self.isMultipleTouchEnabled = false
+        setView()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.clipsToBounds = true
-        self.isMultipleTouchEnabled = false
+        setView()
     }
     
-    public func initArgs(increment: CGFloat, min: CGFloat, speed: CGFloat) {
-        self.increment = increment
-        self.min = min
-        self.speed = speed
+    private func setView() {
+        self.clipsToBounds = true
+        self.isMultipleTouchEnabled = false
     }
 
 //MARK: TOUCH PART
@@ -67,7 +78,7 @@ class GearWheel: UIView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value!
+            self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
             lastX = touch.location(in: self).x
         }
     }
@@ -80,45 +91,43 @@ class GearWheel: UIView {
 //MARK: DRAW PART
     
     override func draw(_ rect: CGRect) {
-        guard self.value != nil else { return }
-        if let ctx = UIGraphicsGetCurrentContext()
-        {
-            let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            let gearHeight = self.bounds.height * 40 / 100
-            let mid = self.bounds.width / 2
-            let trunck = self.value!.truncatingRemainder(dividingBy: self.increment)
-            let start = (self.value! - trunck - self.min) / self.increment
-            var xStart = mid - (start * incrementDisplay) - (trunck / self.increment *  incrementDisplay)
-            if (xStart > (self.bounds.width / 2)) {
-                xStart = (self.bounds.width / 2 - xStart) - xStart
-            }
-            
-            let step = self.increment * 5
-            let trunckStep = self.value! - self.value!.truncatingRemainder(dividingBy: self.increment * 5)
-            
-            var incr = CGFloat(0)
-            var x: CGFloat
-            
-            repeat {
-                x = (incr * incrementDisplay) + xStart
-                if (((incr * self.increment) + trunckStep).truncatingRemainder(dividingBy: step) == 0) {
-                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
-                             p2: CGPoint(x: x, y: self.bounds.height),
-                             ctx: ctx, width: 1,
-                             rounded: false,
-                             color: UIColor.black)
-                } else {
-                    drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
-                             p2: CGPoint(x: x, y: self.bounds.height),
-                             ctx: ctx, width: 1,
-                             rounded: false,
-                             color: UIColor.lightGray)
-                }
-                ctx.strokePath()
-                incr += 1
-            }  while (x < self.bounds.width)
-            drawCursor(ctx: ctx, middle: mid)
+        guard let ctx = UIGraphicsGetCurrentContext() else { return }
+        
+        let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
+        let gearHeight = self.bounds.height * 40 / 100
+        let mid = self.bounds.width / 2
+        let trunck = self.value.truncatingRemainder(dividingBy: self.increment)
+        let start = (self.value - trunck - self.min) / self.increment
+        var xStart = mid - (start * incrementDisplay) - (trunck / self.increment *  incrementDisplay)
+        if (xStart > (self.bounds.width / 2)) {
+            xStart = (self.bounds.width / 2 - xStart) - xStart
         }
+        
+        let displayStep = self.increment * self.step
+        let trunckStep = self.value - self.value.truncatingRemainder(dividingBy: displayStep)
+        
+        var incr = CGFloat(0)
+        var x: CGFloat
+        
+        repeat {
+            x = (incr * incrementDisplay) + xStart
+            if (((incr * self.increment) + trunckStep).truncatingRemainder(dividingBy: displayStep) == 0) {
+                drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
+                         p2: CGPoint(x: x, y: self.bounds.height),
+                         ctx: ctx, width: 1,
+                         rounded: false,
+                         color: stepColor)
+            } else {
+                drawLine(p1: CGPoint(x: x, y: self.bounds.height - gearHeight),
+                         p2: CGPoint(x: x, y: self.bounds.height),
+                         ctx: ctx, width: 1,
+                         rounded: false,
+                         color: gearColor)
+            }
+            ctx.strokePath()
+            incr += 1
+        }  while (x < self.bounds.width)
+        drawCursor(ctx: ctx, middle: mid)
     }
         
     private func drawCursor(ctx: CGContext, middle: CGFloat) {
@@ -127,7 +136,7 @@ class GearWheel: UIView {
                  ctx: ctx,
                  width: 2,
                  rounded: false,
-                 color: UIColor.link)
+                 color: cursorColor)
         ctx.strokePath()
     }
 }

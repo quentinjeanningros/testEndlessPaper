@@ -15,9 +15,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var radiusLabel: UILabel!
     @IBOutlet weak var TutorialLabel: UILabel!
     
-    var minSizeTouch: CGFloat!
-    var minCircleSize: CGFloat!
-    
+    var minSizeTouch: CGFloat = 16
+    var minCircleSize: CGFloat = 20
     var diffCenterTouch: CGPoint!
     var lastTouch: CGPoint!
     
@@ -27,10 +26,8 @@ class ViewController: UIViewController {
         self.view.clipsToBounds = true
         self.view.isMultipleTouchEnabled = false
         
-        self.minSizeTouch = 16
-        self.minCircleSize = self.minSizeTouch + 4
-        gearWheel.initArgs(increment: 5, min: self.minCircleSize, speed: 4)
-        gearWheel.actionUpdate = selectedCircleSizeChanged
+        gearWheel.min = self.minCircleSize
+        gearWheel.onValueChange = selectedCircleSizeChanged
     }
     
 //MARK: TOUCH PART
@@ -40,12 +37,12 @@ class ViewController: UIViewController {
             lastTouch = touch.location(in: self.view)
             guard (!gearWheel.contains(point: lastTouch, tolerance: minSizeTouch + 5)) else { return }
             
-            canvasView.selected = canvasView.getCircle(point: lastTouch, tolerance: minSizeTouch)
+            canvasView.selected = canvasView.getCircle(under: lastTouch, tolerance: minSizeTouch)
             if let circle = canvasView.selected {
                 diffCenterTouch = CGPoint(x: circle.center.x - lastTouch.x, y:  circle.center.y - lastTouch.y)
-                displayWheel(display: true, circle: circle)
+                toggleWheel(circle: circle)
             } else {
-                displayWheel(display: false)
+                toggleWheel()
             }
         }
     }
@@ -67,24 +64,24 @@ class ViewController: UIViewController {
     @IBAction func clearCanvas(_ sender: Any) {
         canvasView.selected = nil
         canvasView.clearCanvas()
-        displayWheel(display: false)
+        toggleWheel()
         TutorialLabel.isHidden = false
     }
     
     @IBAction func doubleTapped(_ sender: Any) {
         canvasView.selected = canvasView.newCircle(position: lastTouch, size: minCircleSize + 20)
-        displayWheel(display: true, circle: canvasView.selected)
+        toggleWheel(circle: canvasView.selected)
         TutorialLabel.isHidden = true
     }
     
-    private func displayWheel(display: Bool ,circle: Circle? = nil) {
-        if (!display) {
-            gearWheel.isHidden = true
-            radiusLabel.isHidden = true
-        } else if (circle != nil) {
+    private func toggleWheel(circle: Circle? = nil) {
+        if (circle != nil) {
             gearWheel.isHidden = false
             radiusLabel.isHidden = false
             gearWheel.value = circle!.radius
+        } else {
+            gearWheel.isHidden = true
+            radiusLabel.isHidden = true
         }
     }
     
