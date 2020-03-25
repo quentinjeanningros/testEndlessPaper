@@ -94,7 +94,6 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fEg-7a-UUJ" secondAttribute="trailing" constant="328" id="2GF-bR-04d"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fEg-7a-UUJ" secondAttribute="bottom" constant="20" id="6MD-0i-7ad"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Iaf-wY-bD1"/>
                             <constraint firstAttribute="bottom" secondItem="oQf-Tp-74N" secondAttribute="bottom" constant="20" symbolic="YES" id="JHN-B2-5c5"/>
