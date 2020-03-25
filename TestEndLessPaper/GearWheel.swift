@@ -49,6 +49,7 @@ import UIKit
     public var onValueChange: ActionUpdate?
 
     private var lastX: CGFloat = 0
+    private let generator = UIImpactFeedbackGenerator(style: .light)
     
 //MARK: INIT PART
     
@@ -78,7 +79,15 @@ import UIKit
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
+            let tmp = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
+            let trunckValue = self.value.truncatingRemainder(dividingBy: self.increment)
+            let trunckTmp = tmp.truncatingRemainder(dividingBy: self.increment)
+            if ((self.value - trunckValue) / self.increment != (tmp - trunckTmp) / self.increment) {
+                print("haptic feedback")
+                self.generator.impactOccurred()
+            }
+            self.value = tmp
+            // self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
             lastX = touch.location(in: self).x
         }
     }

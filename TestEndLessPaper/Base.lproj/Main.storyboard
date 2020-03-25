@@ -19,7 +19,7 @@
                                 <rect key="frame" x="0.0" y="20" width="414" height="856"/>
                                 <subviews>
                                     <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="stc-es-Wma" customClass="GearWheel" customModule="TestEndLessPaper" customModuleProvider="target">
-                                        <rect key="frame" x="8" y="780" width="398" height="30"/>
+                                        <rect key="frame" x="8" y="756" width="398" height="30"/>
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="30" id="Qs6-7M-twR"/>
@@ -52,7 +52,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F4e-8Q-iGa" userLabel="Radius Label">
-                                        <rect key="frame" x="20" y="751" width="374" height="23"/>
+                                        <rect key="frame" x="20" y="727" width="374" height="23"/>
                                         <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
                                         <color key="textColor" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
@@ -68,12 +68,11 @@
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="stc-es-Wma" secondAttribute="trailing" constant="8" id="7l3-tT-0Lb"/>
-                                    <constraint firstAttribute="bottom" secondItem="stc-es-Wma" secondAttribute="bottom" constant="46" id="Iqp-YR-cfY"/>
                                     <constraint firstItem="cww-Uh-dWN" firstAttribute="top" secondItem="oQf-Tp-74N" secondAttribute="top" constant="418" id="R7a-1U-zgn"/>
                                     <constraint firstAttribute="trailing" secondItem="cww-Uh-dWN" secondAttribute="trailing" constant="8" id="SG4-IW-aFi"/>
-                                    <constraint firstItem="F4e-8Q-iGa" firstAttribute="top" secondItem="cww-Uh-dWN" secondAttribute="bottom" constant="312" id="Zov-vU-EFf"/>
                                     <constraint firstItem="cww-Uh-dWN" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="a6X-IR-gkw"/>
                                     <constraint firstItem="F4e-8Q-iGa" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="20" symbolic="YES" id="gBZ-Vm-ZAy"/>
+                                    <constraint firstAttribute="bottom" secondItem="stc-es-Wma" secondAttribute="bottom" constant="70" id="nOS-a4-wOv"/>
                                     <constraint firstItem="stc-es-Wma" firstAttribute="top" secondItem="F4e-8Q-iGa" secondAttribute="bottom" constant="6" id="oMR-qo-B78"/>
                                     <constraint firstItem="stc-es-Wma" firstAttribute="leading" secondItem="oQf-Tp-74N" secondAttribute="leading" constant="8" id="ujP-wg-dOa"/>
                                     <constraint firstAttribute="trailing" secondItem="F4e-8Q-iGa" secondAttribute="trailing" constant="20" symbolic="YES" id="vBS-dM-E1C"/>
@@ -83,7 +82,7 @@
                                 </connections>
                             </view>
                             <button opaque="NO" alpha="0.5" contentMode="scaleToFill" restorationIdentifier="ClearButton" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fEg-7a-UUJ">
-                                <rect key="frame" x="50" y="832" width="36" height="30"/>
+                                <rect key="frame" x="50" y="812" width="36" height="30"/>
                                 <state key="normal" title="Clear">
                                     <color key="titleColor" systemColor="systemRedColor" red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -95,11 +94,10 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fEg-7a-UUJ" secondAttribute="bottom" id="7cv-UI-f6c"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fEg-7a-UUJ" secondAttribute="bottom" constant="20" id="6MD-0i-7ad"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Iaf-wY-bD1"/>
                             <constraint firstAttribute="bottom" secondItem="oQf-Tp-74N" secondAttribute="bottom" constant="20" symbolic="YES" id="JHN-B2-5c5"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" symbolic="YES" id="dIE-JK-cGy"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fEg-7a-UUJ" secondAttribute="trailing" constant="328" id="iA8-Ag-PrK"/>
                             <constraint firstItem="fEg-7a-UUJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="u6O-nD-ces"/>
                             <constraint firstItem="oQf-Tp-74N" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="wc2-d9-qAk"/>
                         </constraints>
