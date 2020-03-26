@@ -41,13 +41,26 @@ import UIKit
             self.setNeedsDisplay()
         }
     }
+    @IBInspectable var inertieTriggerer: CGFloat = 20  {
+           didSet {
+               inertieTriggerer = inertieTriggerer >= 0 ? inertieTriggerer : 0
+           }
+       }
+    @IBInspectable var deceleration: CGFloat = 15  {
+        didSet {
+            deceleration = deceleration >= 1 ? deceleration : 1
+        }
+    }
     @IBInspectable var speed: CGFloat = 4
     @IBInspectable var gearColor: UIColor = UIColor.lightGray
     @IBInspectable var stepColor: UIColor = UIColor.black
     @IBInspectable var cursorColor: UIColor = UIColor.link
+
     
     public var onValueChange: ActionUpdate?
-
+    
+    private var beganX: CGFloat = 0
+    private var beganTime: Double = 0
     private var lastX: CGFloat = 0
     private let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -69,27 +82,68 @@ import UIKit
     }
 
 //MARK: TOUCH PART
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             self.lastX = touch.location(in: self).x
+            self.beganX = self.lastX
+            self.beganTime = CACurrentMediaTime()
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let incrementDisplay = self.bounds.width * 3 / 100 // consider  1 incrementDisplay = 1 increment
-            let tmp = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
-            let trunckValue = self.value.truncatingRemainder(dividingBy: self.increment)
-            let trunckTmp = tmp.truncatingRemainder(dividingBy: self.increment)
-            if ((self.value - trunckValue) / self.increment != (tmp - trunckTmp) / self.increment) {
-                print("haptic feedback")
-                self.generator.impactOccurred()
-            }
-            self.value = tmp
-            // self.value  = (self.lastX - touch.location(in: self).x) * speed / incrementDisplay + self.value
+            moveTo(newValue: (self.lastX - touch.location(in: self).x) * self.speed / incrementDisplay + self.value)
             lastX = touch.location(in: self).x
         }
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            touchLeave(touch: touch)
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            touchLeave(touch: touch)
+        }
+    }
+    
+    func touchLeave(touch: UITouch) {
+        let actualTime = CACurrentMediaTime()
+        var inertie = (touch.location(in: self).x - self.beganX) / CGFloat(actualTime - self.beganTime)
+        let negatif = inertie >= 0 ? false : true
+        if (negatif) {
+            inertie = -1 * inertie
+        }
+        if (inertie > self.inertieTriggerer) {
+            var time = CACurrentMediaTime()
+            let incrementDisplay = self.bounds.width * 3 / 100
+            while (inertie > 0) {
+                let tmpTime = CACurrentMediaTime()
+                let diffTime = CGFloat(tmpTime - time)
+                time = tmpTime
+                let distance = diffTime * inertie * self.speed
+                let newValue = negatif ? self.value + (distance / incrementDisplay) : self.value - (distance / incrementDisplay)
+                if (newValue <= self.min || inertie < 0.5) {
+                    break
+                }
+                print(inertie)
+                moveTo(newValue: newValue)
+                inertie = inertie - (distance * deceleration)
+            }
+        }
+    }
+    
+    func moveTo(newValue: CGFloat) {
+        let trunckValue = self.value.truncatingRemainder(dividingBy: self.increment)
+        let trunckNew = newValue.truncatingRemainder(dividingBy: self.increment)
+        if ((self.value - trunckValue) / self.increment != (newValue - trunckNew) / self.increment) {
+            self.generator.impactOccurred()
+        }
+        self.value = newValue
     }
     
     func contains(point: CGPoint, tolerance: CGFloat) -> Bool {
